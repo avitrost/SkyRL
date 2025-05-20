@@ -227,6 +227,9 @@ class RLHFDataset(Dataset):
         index = row_dict.get("extra_info", {}).get("index", 0)
         row_dict["index"] = index
 
+        ground_truth = row_dict.get("reward_model", {}).get("ground_truth", None)
+        row_dict["ground_truth"] = ground_truth
+
         return row_dict
 
     def __getstate__(self):

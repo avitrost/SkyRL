@@ -296,12 +296,8 @@ class ScratchpadAgentGroup:
         for data_item in self.batch:
             instance_id = data_item.non_tensor_batch['index']
             self.agents[instance_id] = {}
-            prompt = data_item.non_tensor_batch['raw_prompt']
-            print(f"instance id {instance_id}, prompt: {prompt}")
-            print(prompt)
-            print("prompt length: ")
-
-            ground_truth = data_item.non_tensor_batch['reward_model']['ground_truth']
+            prompt = data_item.non_tensor_batch['raw_prompt'][0]['content']
+            ground_truth = data_item.non_tensor_batch['ground_truth']
             for n in range(self.num_trajectories):
                 self.agents[instance_id][n] = ScratchpadAgent(
                     instance_id=instance_id,
