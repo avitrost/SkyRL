@@ -294,10 +294,7 @@ class ScratchpadAgentGroup:
     def _initialize_agents(self) -> None:
         """Initialize agent instances for each task."""
         for data_item in self.batch:
-            print("data item non tensor batch: ")
-            print(data_item.non_tensor_batch)
-            print('----')
-            instance_id = data_item.non_tensor_batch['instance']['instance_id']
+            instance_id = data_item.non_tensor_batch['index']
             self.agents[instance_id] = {}
             for n in range(self.num_trajectories):
                 self.agents[instance_id][n] = ScratchpadAgent(
@@ -313,7 +310,7 @@ class ScratchpadAgentGroup:
                 self.agents[instance_id][n].max_iterations = self.max_iterations
 
     async def _run_agent(self, batch_id: int, trajectory_id: int) -> Dict[str, Any]:
-        instance_id = self.batch[batch_id].non_tensor_batch['instance']['instance_id']
+        instance_id = self.batch[batch_id].non_tensor_batch['index']
         """Run a single agent to completion and return the results."""
         agent = self.agents[instance_id][trajectory_id]
         assert agent is not None
@@ -354,7 +351,7 @@ class ScratchpadAgentGroup:
         # Helper function to run one agent
         async def run_one_agent():
             batch_idx, trajectory_id = await run_queue.get()
-            instance_id = self.batch[batch_idx].non_tensor_batch['instance']['instance_id']
+            instance_id = self.batch[batch_idx].non_tensor_batch['index']
             start_time = time.time()
             try:
                 logger.info(f"Running agent for instance {instance_id}, trajectory {trajectory_id}")
