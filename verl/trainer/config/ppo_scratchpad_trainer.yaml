@@ -81,7 +81,7 @@ actor_rollout_ref:
     ulysses_sequence_parallel_size: ${actor_rollout_ref.actor.ulysses_sequence_parallel_size} # sp size
   rollout:
     name: async
-    # task_type: 'swegym'
+    task_type: 'swegym'
     temperature: 1.0
     top_k: -1 # 0 for hf rollout, -1 for vllm rollout
     top_p: 1
@@ -220,7 +220,7 @@ trainer:
   total_training_steps: null
   project_name: verl_examples
   experiment_name: gsm8k
-  logger: [ 'console' ] # can add wandb
+  logger: [ 'console', 'wandb' ]
   log_val_generations: 0
   nnodes: 1
   n_gpus_per_node: 8
@@ -236,5 +236,3 @@ trainer:
   default_local_dir: checkpoints/${trainer.project_name}/${trainer.experiment_name}
   max_actor_ckpt_to_keep: null
   max_critic_ckpt_to_keep: null
-
-
