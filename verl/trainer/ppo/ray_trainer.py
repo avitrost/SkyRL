@@ -939,12 +939,8 @@ class RayPPOTrainer(object):
                         gen_batch = batch.pop(batch_keys=batch_keys,
                                                 non_tensor_batch_keys=['instance'])
                     else:
-                        print('batch keys')
-                        print(batch)
-                        print('-------------------------')
-                        assert False
                         gen_batch = batch.pop(batch_keys=batch_keys,
-                                                non_tensor_batch_keys=['raw_prompt_ids'])
+                                                non_tensor_batch_keys=['raw_prompt_ids', 'index'])
 
                 is_last_step = self.global_steps >= self.total_training_steps
 
