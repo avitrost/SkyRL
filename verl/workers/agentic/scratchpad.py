@@ -310,7 +310,6 @@ class ScratchpadAgentGroup:
                     qwen3_enable_thinking=self.qwen3_enable_thinking
                 )
                 # Set the instance data for each agent
-                self.agents[instance_id][n].instance_data = data_item.non_tensor_batch['instance']
                 self.agents[instance_id][n].max_iterations = self.max_iterations
 
     async def _run_agent(self, batch_id: int, trajectory_id: int) -> Dict[str, Any]:
