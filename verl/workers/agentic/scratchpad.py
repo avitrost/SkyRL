@@ -299,6 +299,10 @@ class ScratchpadAgentGroup:
             prompt = data_item.non_tensor_batch['raw_prompt'][0]['content']
             ground_truth = data_item.non_tensor_batch['ground_truth']
             for n in range(self.num_trajectories):
+                print('************************************')
+                print('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
+                print('************************************')
+                print(f"Creating agent for instance {instance_id}, trajectory {n}")
                 self.agents[instance_id][n] = ScratchpadAgent(
                     instance_id=instance_id,
                     trajectory_id=n,
@@ -314,6 +318,7 @@ class ScratchpadAgentGroup:
                 self.agents[instance_id][n].max_iterations = self.max_iterations
 
     async def _run_agent(self, batch_id: int, trajectory_id: int) -> Dict[str, Any]:
+        assert False
         instance_id = self.batch[batch_id].non_tensor_batch['index']
         """Run a single agent to completion and return the results."""
         agent = self.agents[instance_id][trajectory_id]
