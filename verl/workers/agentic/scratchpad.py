@@ -255,6 +255,7 @@ class ScratchpadAgentGroup:
         
         # Initialize agents for each instance
         self._initialize_agents()
+        assert False
 
     def _convert_results_to_dataproto(self) -> Dict[int, Dict[int, Dict[str, Any]]]:
         """
