@@ -2,7 +2,7 @@ PROJECT_NAME='scratchpad-training-qwen3-no-thinking-8b-grpo'
 EXPERIMENT_NAME='scratchpad-training-qwen3-8b-32bsz-16r-temp0.6-25turn-easy'
 DATA_PATH="gsm8k"
 SFT_MODEL_PATH='Qwen/Qwen3-8B' 
-CKPT_PATH='<path_to_ckpt>'
+CKPT_PATH='test123'
 
 
 BATCH_SIZE=32
