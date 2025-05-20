@@ -294,6 +294,9 @@ class ScratchpadAgentGroup:
     def _initialize_agents(self) -> None:
         """Initialize agent instances for each task."""
         for data_item in self.batch:
+            print("data item non tensor batch: ")
+            print(data_item.non_tensor_batch)
+            print('----')
             instance_id = data_item.non_tensor_batch['instance']['instance_id']
             self.agents[instance_id] = {}
             for n in range(self.num_trajectories):
