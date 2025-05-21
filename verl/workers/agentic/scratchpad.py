@@ -410,6 +410,7 @@ class ScratchpadAgentGroup:
         
         # Start a few agent run tasks (they'll wait on the run_queue)
         for i in range(self.max_parallel_agents):
+            assert False
             print(f"Starting initial run task {i}")
             needed_run_tasks -= 1
             task = asyncio.create_task(run_one_agent())
