@@ -168,8 +168,8 @@ class ScratchpadAgent:
             self.state['solved_idx'] = self.step_count
             self.state['solved'] = True
     
-    async def generate(self, input_ids, sampling_params):
-        res = await self.infer_engine.async_generate(input_ids=input_ids, sampling_params=sampling_params)
+    async def generate(self, text, sampling_params):
+        res = await self.infer_engine.async_generate(text=text, sampling_params=sampling_params)
         response_str = res["text"]
         return response_str
 
