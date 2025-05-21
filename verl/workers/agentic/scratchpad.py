@@ -186,7 +186,7 @@ class ScratchpadAgent:
             input_text = self._prepare_input()
             # response_str = call_async_from_sync(self.generate, prompt=input_text, sampling_params=self.sampling_params)
             response_str = await self.generate(prompt=input_text, sampling_params=self.sampling_params)
-            print("response_str: ", response_str, flush=True)
+            print("response_str: ", response_str)
             print("&&&&&&&&&&&&")
             self._update_state(response_str)
             self.step_count += 1
@@ -278,26 +278,7 @@ class ScratchpadAgentGroup:
                 results_dataproto[instance_id][trajectory_id] = result
         print("results dataproto: ", results_dataproto)
         print("PAUSE")
-        input("Press Enter to continue...")
         return results_dataproto
-
-    def close(self):
-        """Clean up resources"""
-            
-        # Close all agent instances
-        for instance_id in self.agents:
-            for trajectory_id in self.agents[instance_id]:
-                self._cleanup_agent(instance_id, trajectory_id)
-    
-    def _cleanup_agent(self, instance_id, trajectory_id):
-        try:
-            self.agents[instance_id][trajectory_id].close()
-        except Exception as e:
-            logger.warning(f"Error closing agent {instance_id}, trajectory {trajectory_id}: {str(e)}")
-
-    def __del__(self):
-        """Destructor to ensure resources are cleaned up"""
-        self.close()
     
     def _initialize_agents(self) -> None:
         """Initialize agent instances for each task."""
@@ -341,8 +322,6 @@ class ScratchpadAgentGroup:
                 'solved_idx': return_val['solved_idx'],
                 'solved': return_val['solved'],
             }
-        
-        self._cleanup_agent(instance_id, trajectory_id)
 
         return return_val
     
