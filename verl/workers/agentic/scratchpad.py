@@ -255,7 +255,6 @@ class ScratchpadAgentGroup:
         
         # Initialize agents for each instance
         self._initialize_agents()
-        assert False
 
     def _convert_results_to_dataproto(self) -> Dict[int, Dict[int, Dict[str, Any]]]:
         """
@@ -415,13 +414,17 @@ class ScratchpadAgentGroup:
         Returns:
             Dict mapping instance ID to a dict of trajectory ID to results
         """
+        print('IN THE RUN FUNCTION')
+        print('************************************')
         try:
             # Try to get the current event loop
             loop = asyncio.get_event_loop()
+            assert False
         except RuntimeError:
             # No event loop exists in this thread, create a new one
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
+            assert False
             
         # Run the generate_trajectories coroutine in the event loop
         try:
