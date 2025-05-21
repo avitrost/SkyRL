@@ -327,7 +327,9 @@ class ScratchpadAgentGroup:
         agent = self.agents[instance_id][trajectory_id]
         assert agent is not None
 
-        return_val = await call_sync_from_async(ScratchpadAgent.attempt_to_solve, agent)
+        # return_val = await call_sync_from_async(ScratchpadAgent.attempt_to_solve, agent)
+        return_val = await agent.attempt_to_solve()
+
         return_val =  {
                 'instance_id': instance_id,
                 'trajectory_id': trajectory_id,
