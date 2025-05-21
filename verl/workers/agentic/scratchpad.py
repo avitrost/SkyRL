@@ -371,7 +371,10 @@ class ScratchpadAgentGroup:
         
         # Helper function to run one agent
         async def run_one_agent():
-            assert False
+            print("Run one agent started")
+            await asyncio.sleep(1)
+            print("Run one agent done")
+            return None
             print("Waiting for a task to run")
             print("**************************************")
             print("**************************************")
