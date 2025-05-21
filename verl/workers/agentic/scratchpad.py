@@ -318,7 +318,11 @@ class ScratchpadAgentGroup:
                 self.agents[instance_id][n].max_iterations = self.max_iterations
 
     async def _run_agent(self, batch_id: int, trajectory_id: int) -> Dict[str, Any]:
-        assert False
+        print("Agent started")
+        await asyncio.sleep(1)
+        print("Agent done")
+        return None
+
         instance_id = self.batch[batch_id].non_tensor_batch['index']
         """Run a single agent to completion and return the results."""
         agent = self.agents[instance_id][trajectory_id]
