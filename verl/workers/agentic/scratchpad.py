@@ -438,5 +438,6 @@ class ScratchpadAgentGroup:
             return loop.run_until_complete(self.generate_trajectories_pipeline())
         finally:
             # Close the batch manager to ensure cleanup
-            self.close()
+            # self.close()
             # loop.close()
+            pass
