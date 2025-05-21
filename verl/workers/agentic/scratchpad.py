@@ -344,14 +344,22 @@ class ScratchpadAgentGroup:
         """
         total_instances = len(self.batch)
         print("Total instances:", total_instances)
+        print("*************************************")
+        print("*************************************")
+        print("*************************************")
+        print("*************************************")
         
         # Only need the run queue
         run_queue = asyncio.Queue(maxsize=self.max_parallel_agents)
+
+        print("queue created")
         
         # Fill the run queue
         for trajectory_id in range(self.num_trajectories):
             for batch_idx in range(total_instances):
                 await run_queue.put((batch_idx, trajectory_id))
+
+        print("queue filled")
         
         # Track active tasks
         active_run_tasks = set()
@@ -388,15 +396,21 @@ class ScratchpadAgentGroup:
                     task.add_done_callback(lambda t: active_run_tasks.discard(t))
         
         # Start a few agent run tasks (they'll wait on the run_queue)
-        for _ in range(self.max_parallel_agents):
+        for i in range(self.max_parallel_agents):
+            print(f"Starting initial run task {i}")
             needed_run_tasks -= 1
             task = asyncio.create_task(run_one_agent())
+            print(f"Task {i} created")
             active_run_tasks.add(task)
+            print(f"Task {i} added to active tasks")
             task.add_done_callback(lambda t: active_run_tasks.discard(t))
+            print(f"Task {i} added done callback")
         
         # Wait for all run tasks to complete
         if run_queue.qsize() > 0:
+            print(f"Waiting for {run_queue.qsize()} tasks to complete")
             await run_queue.join()
+        print("All tasks in queue completed")
         
         # Wait for any remaining active tasks
         all_tasks = active_run_tasks
@@ -404,7 +418,9 @@ class ScratchpadAgentGroup:
             logger.info(f"Waiting for {len(all_tasks)} (run: {len(active_run_tasks)}) remaining tasks to complete")
             await asyncio.wait(all_tasks)
         
+        print("All tasks completed")
         results_dataproto = self._convert_results_to_dataproto()
+        print("Results converted to DataProto format")
         return results_dataproto
 
     def run(self) -> Dict[int, Dict[int, Dict[str, Any]]]:
@@ -419,12 +435,10 @@ class ScratchpadAgentGroup:
         try:
             # Try to get the current event loop
             loop = asyncio.get_event_loop()
-            assert False
         except RuntimeError:
             # No event loop exists in this thread, create a new one
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
-            assert False
             
         # Run the generate_trajectories coroutine in the event loop
         try:
