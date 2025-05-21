@@ -128,6 +128,10 @@ class ScratchpadAgent:
         self.state['messages'].append([input_text])
 
         input_ids = self.tokenizer(input_text, return_tensors="pt").input_ids
+        print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+        print(self.tokenizer(input_text, return_tensors="pt"))
+        print(input_ids)
+        print('*****')
         return input_ids
     
     def _parse_response(self, response_str: str) -> Tuple[Optional[str], Optional[str]]:  # TODO: don't hardcode
