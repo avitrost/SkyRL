@@ -184,8 +184,9 @@ class ScratchpadAgent:
         while self.step_count < self.max_iterations and not self.state["solved"]:
             print(f"step {self.step_count}")
             input_text = self._prepare_input()
-            response_str = call_async_from_sync(self.generate, prompt=input_text, sampling_params=self.sampling_params)
-            print("response_str: ", response_str)
+            # response_str = call_async_from_sync(self.generate, prompt=input_text, sampling_params=self.sampling_params)
+            response_str = await self.generate(prompt=input_text, sampling_params=self.sampling_params)
+            print("response_str: ", response_str, flush=True)
             print("&&&&&&&&&&&&")
             self._update_state(response_str)
             self.step_count += 1
