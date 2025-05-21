@@ -367,7 +367,12 @@ class ScratchpadAgentGroup:
         
         # Helper function to run one agent
         async def run_one_agent():
+            print("Waiting for a task to run")
+            print("**************************************")
+            print("**************************************")
+            print("**************************************")
             batch_idx, trajectory_id = await run_queue.get()
+            print("Got a task to run")
             instance_id = self.batch[batch_idx].non_tensor_batch['index']
             start_time = time.time()
             try:
