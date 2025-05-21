@@ -127,9 +127,8 @@ class ScratchpadAgent:
         )
         self.state['messages'].append([input_text])
 
-        input_ids = self.tokenizer(input_text, return_tensors="pt").input_ids
+        input_ids = self.tokenizer(input_text, return_tensors="pt")
         print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
-        print(self.tokenizer(input_text, return_tensors="pt"))
         print(input_ids)
         print('*****')
         return input_ids
