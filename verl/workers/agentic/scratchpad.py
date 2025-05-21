@@ -171,9 +171,6 @@ class ScratchpadAgent:
     async def generate(self, prompt, sampling_params):
         res = await self.infer_engine.async_generate(prompt=prompt, sampling_params=sampling_params)
         response_str = res["text"]
-        print("response_str: ", response_str)
-        print('&&&&&&&&&&&&')
-        assert False
         return response_str
 
     async def attempt_to_solve(self):
@@ -188,6 +185,8 @@ class ScratchpadAgent:
             print(f"step {self.step_count}")
             input_text = self._prepare_input()
             response_str = call_async_from_sync(self.generate, prompt=input_text, sampling_params=self.sampling_params)
+            print("response_str: ", response_str)
+            print("&&&&&&&&&&&&")
             self._update_state(response_str)
             self.step_count += 1
 
