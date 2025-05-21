@@ -100,6 +100,8 @@ class ScratchpadAgent:
 
         self.qwen3_enable_thinking = qwen3_enable_thinking
 
+        self._initialize_state()
+
     def _initialize_state(self) -> None:
         """Initialize the agent's state."""
         self.state = {
