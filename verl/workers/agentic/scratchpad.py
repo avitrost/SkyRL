@@ -175,6 +175,10 @@ class ScratchpadAgent:
     async def attempt_to_solve(self):
         """Attempt to solve the task."""
         print(f"instance id {self.instance_id}, trajectory {self.trajectory_id}")
+        print("ATTEMPTING TO SOLVE")
+        print("prompt: ", self.prompt)
+        print("ground truth: ", self.ground_truth)
+        print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
         self.step_count = 0
         while self.step_count < self.max_iterations and not self.state["solved"]:
             print(f"step {self.step_count}")
@@ -318,11 +322,6 @@ class ScratchpadAgentGroup:
                 self.agents[instance_id][n].max_iterations = self.max_iterations
 
     async def _run_agent(self, batch_id: int, trajectory_id: int) -> Dict[str, Any]:
-        print("Agent started")
-        await asyncio.sleep(1)
-        print("Agent done")
-        return None
-
         instance_id = self.batch[batch_id].non_tensor_batch['index']
         """Run a single agent to completion and return the results."""
         agent = self.agents[instance_id][trajectory_id]
@@ -371,10 +370,6 @@ class ScratchpadAgentGroup:
         
         # Helper function to run one agent
         async def run_one_agent():
-            print("Run one agent started")
-            await asyncio.sleep(1)
-            print("Run one agent done")
-            return None
             print("Waiting for a task to run")
             print("**************************************")
             print("**************************************")
