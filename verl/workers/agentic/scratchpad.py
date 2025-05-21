@@ -127,11 +127,7 @@ class ScratchpadAgent:
         )
         self.state['messages'].append([input_text])
 
-        input_ids = self.tokenizer(input_text, return_tensors="pt")
-        print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
-        print(input_ids)
-        print('*****')
-        return input_ids
+        return input_text
     
     def _parse_response(self, response_str: str) -> Tuple[Optional[str], Optional[str]]:  # TODO: don't hardcode
         # Parse answer
@@ -187,8 +183,8 @@ class ScratchpadAgent:
         self.step_count = 0
         while self.step_count < self.max_iterations and not self.state["solved"]:
             print(f"step {self.step_count}")
-            input_ids = self._prepare_input()
-            response_str = call_async_from_sync(self.generate, input_ids=input_ids, sampling_params=self.sampling_params)
+            input_text = self._prepare_input()
+            response_str = call_async_from_sync(self.generate, prompt=input_text, sampling_params=self.sampling_params)
             self._update_state(response_str)
             self.step_count += 1
 
