@@ -547,8 +547,8 @@ class SimpleExploreAgentGroup:
         agent = self.agents[instance_id][trajectory_id]
         assert agent is not None
 
-        return_vals = await call_sync_from_async(SimpleExploreAgent.explore, agent)
-        # return_vals = await agent.explore()
+        # return_vals = await call_sync_from_async(SimpleExploreAgent.explore, agent)
+        return_vals = await agent.explore()
         print(f"Agent for instance {instance_id}, trajectory {trajectory_id} completed")
         # print(f"Return values: {return_vals}")
         print("************************************")
