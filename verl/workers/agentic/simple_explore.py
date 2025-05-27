@@ -269,7 +269,7 @@ class SimpleExploreAgent:
             input_text = self._prepare_input()  # from history
             print(f"Input text for generation {i}:", input_text)
             # response_str = await self.generate(prompt=input_text, sampling_params=self.sampling_params)
-            response_str = call_async_from_sync(self.generate, input_text, self.sampling_params)
+            response_str = call_async_from_sync(self.generate, prompt=input_text, sampling_params=self.sampling_params)
             print("GOT A RESPONSE STRING")
             extracted_answer = self._parse_response(response_str)
             self.history.append(extracted_answer)  # update history
