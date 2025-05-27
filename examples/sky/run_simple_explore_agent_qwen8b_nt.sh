@@ -1,14 +1,14 @@
 PROJECT_NAME='simple-explore-training-qwen3-no-thinking-8b-grpo'
 EXPERIMENT_NAME='simple-explore-training-qwen3-8b-32bsz-16r-temp0.6-25turn-easy'
 DATA_PATH="gsm8k"
-SFT_MODEL_PATH='Qwen/Qwen3-8B' 
+SFT_MODEL_PATH='Qwen/Qwen2.5-0.5B' 
 CKPT_PATH='test123'
 
 
-BATCH_SIZE=4 # 32
+BATCH_SIZE=2 # 32
 MAX_NUM_ITERS=1 # 25
 NUM_TRAJ=2 # 8
-MAX_PARALLEL_AGENTS=4 # 64
+MAX_PARALLEL_AGENTS=1 # 64
 SAVE_FREQ=1
 
 USE_KL_LOSS=True
@@ -81,7 +81,7 @@ PYTHONUNBUFFERED=1 uv run --isolated --directory . --frozen --env-file .env -m v
     trainer.default_local_dir=$CKPT_PATH/$PROJECT_NAME/$EXPERIMENT_NAME \
     trainer.resume_mode=auto \
     trainer.max_actor_ckpt_to_keep=10 \
-    trainer.n_gpus_per_node=4 \
+    trainer.n_gpus_per_node=1 \
     trainer.nnodes=$NNODES \
     trainer.save_freq=$SAVE_FREQ \
     data.dataloader_num_workers=0 \
