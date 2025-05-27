@@ -5,9 +5,9 @@ SFT_MODEL_PATH='Qwen/Qwen2.5-0.5B'
 CKPT_PATH='test123'
 
 
-BATCH_SIZE=2 # 32
+BATCH_SIZE=1 # 32
 MAX_NUM_ITERS=1 # 25
-NUM_TRAJ=2 # 8
+NUM_TRAJ=1 # 8
 MAX_PARALLEL_AGENTS=1 # 64
 SAVE_FREQ=1
 
@@ -30,7 +30,7 @@ TOP_P=0.95
 
 
 PYTHONUNBUFFERED=1 uv run --isolated --directory . --frozen --env-file .env -m verl.trainer.main_ppo \
-    algorithm.adv_estimator=grpo \
+    algorithm.adv_estimator=gae \
     data.train_files=["$DATA_PATH/train.parquet"] \
     data.val_files=["$DATA_PATH/test.parquet"] \
     data.train_batch_size=$BATCH_SIZE \
