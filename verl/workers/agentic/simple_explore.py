@@ -263,7 +263,8 @@ class SimpleExploreAgent:
     
     async def explore(self):
         return_vals = []
-        for _ in range(self.max_iterations):
+        for i in range(self.max_iterations):
+            print(f"Exploring instance {self.instance_id}, trajectory {self.trajectory_id}, iteration {i}/{self.max_iterations}")
             # Generate the next step
             input_text = self._prepare_input()  # from history
             response_str = await self.generate(prompt=input_text, sampling_params=self.sampling_params)
@@ -287,6 +288,7 @@ class SimpleExploreAgent:
                 'history': self.history,
             }
             return_vals.append(turn_return_val)
+        print("GOT ALL RETURN VALS")
         return return_vals
 
 class SimpleExploreAgentGroup:
