@@ -594,6 +594,7 @@ class SimpleExploreAgentGroup:
                 
                 print(f"Successfully completed instance {instance_id}, trajectory {trajectory_id} in {elapsed:.2f}s")
             except Exception as e:
+                print(f"[ERROR] Error running agent for instance {instance_id}, trajectory {trajectory_id}: {str(e)}")
                 logger.error(f"[This line should not be reached!!] Error running agent for {instance_id}, trajectory {trajectory_id}: {str(e)}")
                 # Store error result
                 raise e
