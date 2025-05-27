@@ -249,6 +249,7 @@ class SimpleExploreAgent:
                 return None
         answer = parse_answer(response_str)
         if answer is None:
+            print(f"Failed to parse answer from response")
             logger.warning(f"Failed to parse answer from response: {response_str}")
 
         return answer
@@ -257,7 +258,7 @@ class SimpleExploreAgent:
         print(f"Generating response for instance {self.instance_id}, trajectory {self.trajectory_id}")
         res = await self.infer_engine.async_generate(prompt=prompt, sampling_params=sampling_params)
         response_str = res["text"]
-        print(f"Generated response for instance {self.instance_id}, trajectory {self.trajectory_id}: {response_str}")
+        print(f"Generated response for instance {self.instance_id}, trajectory {self.trajectory_id}")
         return response_str
     
     async def explore(self):
@@ -266,6 +267,7 @@ class SimpleExploreAgent:
             # Generate the next step
             input_text = self._prepare_input()  # from history
             response_str = await self.generate(prompt=input_text, sampling_params=self.sampling_params)
+            print("GOT A RESPONSE STRING")
             extracted_answer = self._parse_response(response_str)
             self.history.append(extracted_answer)  # update history
             messages = [
@@ -544,7 +546,7 @@ class SimpleExploreAgentGroup:
         # return_val = await call_sync_from_async(ScratchpadAgent.attempt_to_solve, agent)
         return_vals = await agent.explore()
         print(f"Agent for instance {instance_id}, trajectory {trajectory_id} completed")
-        print(f"Return values: {return_vals}")
+        # print(f"Return values: {return_vals}")
         print("************************************")
 
         return return_vals
