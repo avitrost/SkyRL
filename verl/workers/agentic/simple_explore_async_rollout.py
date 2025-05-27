@@ -108,6 +108,7 @@ class AsyncSimpleExploreRollout(BaseRollout):
             tokenizer=self.engine.tokenizer_manager.tokenizer,
             sampling_params=sampling_params,
             device=device,
+            remove_think_tokens=self.config.remove_think_tokens,
             qwen3_enable_thinking=self.config.qwen3_enable_thinking,
         )
 
