@@ -543,6 +543,9 @@ class SimpleExploreAgentGroup:
 
         # return_val = await call_sync_from_async(ScratchpadAgent.attempt_to_solve, agent)
         return_vals = await agent.explore()
+        print(f"Agent for instance {instance_id}, trajectory {trajectory_id} completed")
+        print(f"Return values: {return_vals}")
+        print("************************************")
 
         return return_vals
     
