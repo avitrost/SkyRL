@@ -267,6 +267,7 @@ class SimpleExploreAgent:
             print(f"Exploring instance {self.instance_id}, trajectory {self.trajectory_id}, iteration {i}/{self.max_iterations}")
             # Generate the next step
             input_text = self._prepare_input()  # from history
+            print(f"Input text for generation {i}:", input_text)
             response_str = await self.generate(prompt=input_text, sampling_params=self.sampling_params)
             print("GOT A RESPONSE STRING")
             extracted_answer = self._parse_response(response_str)
