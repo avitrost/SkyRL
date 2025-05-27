@@ -193,7 +193,6 @@ class SimpleExploreAgent:
         instance_id: int,
         trajectory_id: int,
         prompt: str,
-        ground_truth: str,
         max_prompt_length: int = 1024,
         infer_engine=None,
         tokenizer=None,
@@ -219,7 +218,6 @@ class SimpleExploreAgent:
         self.max_iterations = max_iterations
 
         self.prompt = prompt
-        self.ground_truth = ground_truth
 
         self.reward_func = reward_func
 
@@ -355,22 +353,6 @@ class SimpleExploreAgentGroup:
         self.remove_think_tokens = remove_think_tokens
         if self.remove_think_tokens:
             logger.info("Removing think tokens....")
-
-    def _convert_results_to_dataproto(self) -> Dict[int, Dict[int, Dict[str, Any]]]:
-        """
-        Convert the results to a DataProto format.
-        
-        Returns:
-            A dictionary mapping instance ID to a dictionary of trajectory ID to results
-        """
-        results_dataproto = {}
-        for instance_id, trajectories in self.results.items():
-            results_dataproto[instance_id] = {}
-            for trajectory_id, result in trajectories.items():
-                results_dataproto[instance_id][trajectory_id] = result
-        print("results dataproto: ", results_dataproto)
-        print("PAUSE")
-        return results_dataproto
     
     def _convert_results_to_dataproto(self) -> DataProto:
         """
@@ -386,11 +368,6 @@ class SimpleExploreAgentGroup:
         """
 
         # Non-tensor data
-        git_patch_list = []
-        success_list = []
-        error_list = []
-        resolved_list = []
-        has_finish_action_list = []
         history_list = []
         
         # Create a mapping of instance_id -> list of trajectories
@@ -402,25 +379,25 @@ class SimpleExploreAgentGroup:
 
         # Create the final results in the same order as the batch
         matched_results = []
-        instance_list = []
+        # instance_list = []
         for batch_item in self.batch:
-            instance_id = batch_item.non_tensor_batch['instance']['instance_id']
-            instance = batch_item.non_tensor_batch['instance']
+            instance_id = batch_item.non_tensor_batch['index']
+            # instance = batch_item.non_tensor_batch['instance']
             if instance_id in instance_trajectories:
                 # Add all trajectories for this instance
                 traj_results = instance_trajectories[instance_id]
                 matched_results.extend(traj_results)
-                instance_list.extend([instance] * len(traj_results))
+                # instance_list.extend([instance] * len(traj_results))
         
         assert len(matched_results) == self.num_trajectories * len(self.batch), f"Expected number of results {self.num_trajectories * len(self.batch)}, got {len(matched_results)}"
         
-        # Group results by instance_id for message handling
-        results_by_instance = {}
-        for i, result in enumerate(matched_results):
-            instance_id = instance_list[i]['instance_id']
-            if instance_id not in results_by_instance:
-                results_by_instance[instance_id] = []
-            results_by_instance[instance_id].append((i, result))
+        # # Group results by instance_id for message handling
+        # results_by_instance = {}
+        # for i, result in enumerate(matched_results):
+        #     instance_id = instance_list[i]['instance_id']
+        #     if instance_id not in results_by_instance:
+        #         results_by_instance[instance_id] = []
+        #     results_by_instance[instance_id].append((i, result))
         
         # # Handle empty messages by copying from another trajectory of the same instance
         # for instance_id, results in results_by_instance.items():
@@ -538,7 +515,6 @@ class SimpleExploreAgentGroup:
             instance_id = data_item.non_tensor_batch['index']
             self.agents[instance_id] = {}
             prompt = data_item.non_tensor_batch['raw_prompt'][0]['content']
-            ground_truth = data_item.non_tensor_batch['ground_truth']
             for n in range(self.num_trajectories):
                 print('************************************')
                 print('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
@@ -548,7 +524,6 @@ class SimpleExploreAgentGroup:
                     instance_id=instance_id,
                     trajectory_id=n,
                     prompt=prompt,
-                    ground_truth=ground_truth,
                     max_prompt_length=self.max_prompt_length,
                     tokenizer=self.tokenizer,
                     infer_engine=self.infer_engine,
