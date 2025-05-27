@@ -254,8 +254,10 @@ class SimpleExploreAgent:
         return answer
     
     async def generate(self, prompt, sampling_params):
+        print(f"Generating response for instance {self.instance_id}, trajectory {self.trajectory_id}")
         res = await self.infer_engine.async_generate(prompt=prompt, sampling_params=sampling_params)
         response_str = res["text"]
+        print(f"Generated response for instance {self.instance_id}, trajectory {self.trajectory_id}: {response_str}")
         return response_str
     
     async def explore(self):
