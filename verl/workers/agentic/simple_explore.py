@@ -256,7 +256,185 @@ class SimpleExploreAgentGroup:
         self.results: Dict[int, Dict[int, Any]] = {}
         self._initialize_agents()
 
-    # ... _initialize_agents, _convert_results_to_dataproto are unchanged ...
+    def _convert_results_to_dataproto(self) -> DataProto:
+        """
+        Convert results to DataProto format for training.
+        
+        Args:
+            results: Dictionary of results, with structure {instance_id: {trajectory_id: result_dict}}
+            input_dataproto: The input DataProto that contains the original batch data
+            tokenizer: The tokenizer to use for encoding messages
+            
+        Returns:
+            DataProto: A DataProto object with the converted results
+        """
+
+        # Non-tensor data
+        history_list = []
+        
+        # Create a mapping of instance_id -> list of trajectories
+        instance_trajectories = {}
+        for instance_id, trajectories in self.results.items():
+            instance_trajectories[instance_id] = []
+            for trajectory_id, result in trajectories.items():
+                instance_trajectories[instance_id].append(result)
+
+        # Create the final results in the same order as the batch
+        matched_results = []
+        # instance_list = []
+        for batch_item in self.batch:
+            instance_id = batch_item.non_tensor_batch['index']
+            # instance = batch_item.non_tensor_batch['instance']
+            if instance_id in instance_trajectories:
+                # Add all trajectories for this instance
+                traj_results = instance_trajectories[instance_id]
+                matched_results.extend(traj_results)
+                # instance_list.extend([instance] * len(traj_results))
+        
+        assert len(matched_results) == self.num_trajectories * len(self.batch), f"Expected number of results {self.num_trajectories * len(self.batch)}, got {len(matched_results)}"
+        
+        # # Group results by instance_id for message handling
+        # results_by_instance = {}
+        # for i, result in enumerate(matched_results):
+        #     instance_id = instance_list[i]['instance_id']
+        #     if instance_id not in results_by_instance:
+        #         results_by_instance[instance_id] = []
+        #     results_by_instance[instance_id].append((i, result))
+        
+        # # Handle empty messages by copying from another trajectory of the same instance
+        # for instance_id, results in results_by_instance.items():
+        #     # Find a valid messages list to use as fallback
+        #     valid_messages = None
+        #     valid_patch = None
+        #     for _, result in results:
+        #         messages = result.get('messages', [])
+        #         if messages and len(messages) > 0:
+        #             valid_messages = messages
+        #             valid_patch = result.get('git_patch', None)
+        #             valid_resolved = result.get('resolved', False)
+        #             valid_finish = result.get('finish', False)
+        #             valid_error = result.get('error', None)
+        #             break
+            
+        #     # If we found valid messages, use them for trajectories with empty messages
+        #     if valid_messages:
+        #         for idx, result in results:
+        #             if not result.get('messages') or len(result.get('messages', [])) == 0:
+        #                 print(f"Got empty messages for instance_id {instance_id}, trajectory {idx}. Copying messages array from a valid trajectory. ")
+        #                 # Copy messages from the valid trajectory
+        #                 matched_results[idx]['messages'] = valid_messages.copy()
+        #                 matched_results[idx]['git_patch'] = valid_patch
+        #                 matched_results[idx]['resolved'] = valid_resolved
+        #                 matched_results[idx]['error'] = valid_error
+        #                 matched_results[idx]['finish'] = valid_finish
+        
+        # Get batch of messages
+        all_messages = []
+        all_prompts = []
+        all_responses = []
+        # TODO: iterate through each inner list
+        for result_series in matched_results:
+            for result in result_series:
+                messages = result.get('messages', [])
+                all_messages.append(messages)
+                # get the response: starting from the first assistant message
+                starting_index = 0
+                for i, msg in enumerate(messages):
+                    if msg["role"] == 'assistant':
+                        starting_index = i
+                        break
+                if starting_index == 0:
+                    # If we don't find an assistant, all messages are prompts and there are no responses
+                    print(f'ERROR: Found no assistant message. len(messages) == {len(messages)} and roles are {[msg["role"] for msg in messages]}')
+                    starting_index = len(messages)
+                prompt = messages[:starting_index]
+                all_prompts.append(prompt)
+                response = messages[starting_index:]
+                all_responses.append(response)
+
+                # Also add non-tensor data
+                history_list.append(result.get('history', None))
+
+
+        # Encode messages, get assitant mask and position ids
+        prompt_encodings = self.tokenizer.apply_chat_template(
+            all_prompts, 
+            # return_tensors="pt",
+            add_generation_prompt=False,
+            return_dict=True,
+            padding=True
+        )
+        prompt_input_ids = torch.tensor(prompt_encodings['input_ids'], device=self.device)
+        prompt_attention_mask = torch.tensor(prompt_encodings['attention_mask'], device=self.device)
+        prompt_input_ids, prompt_attention_mask = convert_right_padding_to_left(self.tokenizer, prompt_input_ids, prompt_attention_mask, self.device, self.max_starting_message_length)
+
+        response_encodings = self.tokenizer.apply_chat_template(
+            all_responses,
+            chat_template=chat_template_qwen3_thinking if self.remove_think_tokens else chat_template,
+            # return_tensors="pt",
+            return_assistant_tokens_mask=True,
+            add_generation_prompt=False,
+            return_dict=True,
+            padding=True
+        )
+        
+        response_ids, response_attention_mask, response_assistant_mask = pad_to_max_length_right(
+            self.tokenizer, response_encodings, self.total_len, self.device)
+            
+        
+        input_ids = torch.cat([prompt_input_ids, response_ids], dim=1)
+        attention_mask = torch.cat([prompt_attention_mask, response_attention_mask], dim=1)
+        position_ids = compute_position_id_with_mask(attention_mask)
+
+        # Create tensor dictionary
+        logger.info(f"input_ids shape: {input_ids.shape}, response_ids shape: {response_ids.shape}, max_starting_message_length: {self.max_starting_message_length}, max_response_length: {self.total_len}")
+        assert input_ids.shape[1] == attention_mask.shape[1] == position_ids.shape[1], f"input_ids shape {input_ids.shape}, attention_mask shape {attention_mask.shape}, position_ids shape {position_ids.shape} do not match"
+        assert response_ids.shape[1] == response_assistant_mask.shape[1], f"response_ids shape {response_ids.shape}, response_assistant_mask shape {response_assistant_mask.shape} do not match"
+        tensor_dict = {
+            'input_ids': input_ids,
+            'responses': response_ids,
+            'attention_mask': attention_mask,
+            'position_ids': position_ids,
+            'loss_mask': response_assistant_mask,
+        }
+
+        # Create non-tensor dictionary
+        non_tensor_dict = {
+            'history': history_list,
+        }
+        
+        # Create and return DataProto
+        result_dataproto = DataProto.from_dict(
+            tensors=tensor_dict,
+            non_tensors=non_tensor_dict
+        )
+        
+        return result_dataproto
+    
+    def _initialize_agents(self) -> None:
+        """Initialize agent instances for each task."""
+        for data_item in self.batch:
+            instance_id = data_item.non_tensor_batch['index']
+            self.agents[instance_id] = {}
+            prompt = data_item.non_tensor_batch['raw_prompt'][0]['content']
+            for n in range(self.num_trajectories):
+                print('************************************')
+                print('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
+                print('************************************')
+                print(f"Creating agent for instance {instance_id}, trajectory {n}")
+                self.agents[instance_id][n] = SimpleExploreAgent(
+                    instance_id=instance_id,
+                    trajectory_id=n,
+                    prompt=prompt,
+                    max_prompt_length=self.max_prompt_length,
+                    tokenizer=self.tokenizer,
+                    infer_engine=self.infer_engine,
+                    sampling_params=self.sampling_params,
+                    qwen3_enable_thinking=self.qwen3_enable_thinking
+                )
+                # Set the instance data for each agent
+                self.agents[instance_id][n].max_iterations = self.max_iterations
+
 
     # ------------------------------------------------------------------------
     # NEW, DEAD‑LOCK‑FREE PIPELINE
