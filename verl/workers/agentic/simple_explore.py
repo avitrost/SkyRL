@@ -567,8 +567,8 @@ class SimpleExploreAgentGroup:
         print("*************************************")
         
         # Only need the run queue
-        # run_queue = asyncio.Queue(maxsize=self.max_parallel_agents)
-        run_queue = asyncio.Queue(maxsize=0)
+        run_queue = asyncio.Queue(maxsize=self.max_parallel_agents)
+        # run_queue = asyncio.Queue(maxsize=0)
 
 
         print("queue created")
