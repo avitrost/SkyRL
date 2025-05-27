@@ -612,13 +612,18 @@ class SimpleExploreAgentGroup:
                 # Store error result
                 raise e
             finally:
+                print('Task done, removing from queue')
                 run_queue.task_done()
+                print("Finished task done, removing from queue")
                 nonlocal needed_run_tasks
                 # Start another run task if available
                 if needed_run_tasks > 0:
+                    print(f"Starting another run task, {needed_run_tasks} remaining")
                     needed_run_tasks -= 1
                     task = asyncio.create_task(run_one_agent())
+                    print(f"New task created, {needed_run_tasks} remaining")
                     active_run_tasks.add(task)
+                    print(f"New task added to active tasks, {len(active_run_tasks)} total active tasks")
                     task.add_done_callback(lambda t: active_run_tasks.discard(t))
         
         # Start a few agent run tasks (they'll wait on the run_queue)
