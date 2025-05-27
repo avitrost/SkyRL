@@ -30,7 +30,7 @@ TOP_P=0.95
 
 
 PYTHONUNBUFFERED=1 uv run --isolated --directory . --frozen --env-file .env -m verl.trainer.main_ppo \
-    algorithm.adv_estimator=gae \
+    algorithm.adv_estimator=grpo \
     data.train_files=["$DATA_PATH/train.parquet"] \
     data.val_files=["$DATA_PATH/test.parquet"] \
     data.train_batch_size=$BATCH_SIZE \
