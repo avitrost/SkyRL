@@ -16,6 +16,7 @@ from verl.utils.model import compute_position_id_with_mask
 import verl.utils.torch_functional as verl_F
 import torch.nn.functional as F
 from transformers import AutoTokenizer
+from vllm import SamplingParams
 
 import openhands
 import openhands.agenthub.codeact_agent.function_calling as codeact_function_calling
@@ -547,6 +548,7 @@ class SimpleExploreAgentGroup:
 
     def generate(self, prompts, sampling_params):
         print(f"Generating response for instance")
+        sampling_params = SamplingParams(**sampling_params)
         res = self.infer_engine.generate(prompts, sampling_params=sampling_params)
         response_strs = [result["text"] for result in res]
         print(f"Generated response for instance")
