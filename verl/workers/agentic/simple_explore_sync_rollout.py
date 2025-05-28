@@ -60,7 +60,7 @@ class SyncSimpleExploreRollout(BaseRollout):
                 model=model_path,
                 dtype=config.dtype,  # e.g. "float16"
                 tensor_parallel_size=device_mesh.size(1),
-                max_num_batched_tokens=60 * self.total_len,
+                max_num_batched_tokens=config.max_num_batched_tokens,
                 gpu_memory_utilization=config.gpu_memory_utilization,
                 trust_remote_code=True,
             )
