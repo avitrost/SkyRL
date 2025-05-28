@@ -64,6 +64,7 @@ class SyncSimpleExploreRollout(BaseRollout):
                 max_model_len=config.max_model_len,
                 gpu_memory_utilization=config.gpu_memory_utilization,
                 trust_remote_code=True,
+                enable_sleep_mode=True
             )
             print(f"nodedup {torch.distributed.get_rank() = } vLLM engine initialized")
         else:
