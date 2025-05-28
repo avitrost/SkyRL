@@ -418,11 +418,11 @@ class ActorRolloutRefWorker(Worker):
             )
         elif self.config.rollout.name == "sync_simple_explore":
             from verl.workers.agentic.simple_explore_sync_rollout import SyncSimpleExploreRollout
-            from verl.workers.agentic.fsdp_sgl import FSDPSGLShardingManager
+            from verl.workers.sharding_manager import FSDPVLLMShardingManager
             local_path = copy_to_local(self.config.model.path)
             # print(f"nodedup creating async rollout instance, {torch.distributed.get_rank()=} {rollout_device_mesh.get_rank()=} {rollout_device_mesh.shape=}")
             rollout = SyncSimpleExploreRollout(model_path=local_path, config=self.config.rollout, device_mesh=rollout_device_mesh)
-            rollout_sharding_manager = FSDPSGLShardingManager(
+            rollout_sharding_manager = FSDPVLLMShardingManager(
                 module=self.actor_module_fsdp,
                 inference_engine=rollout.engine,
                 model_config=self.actor_model_config,
