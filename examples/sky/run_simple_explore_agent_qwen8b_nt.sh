@@ -1,7 +1,7 @@
 PROJECT_NAME='simple-explore-training-qwen3-no-thinking-8b-grpo'
 EXPERIMENT_NAME='simple-explore-training-qwen3-8b-32bsz-16r-temp0.6-25turn-easy'
 DATA_PATH="gsm8k"
-SFT_MODEL_PATH='Qwen/Qwen2.5-3B' 
+SFT_MODEL_PATH='Qwen/Qwen3-4B' 
 CKPT_PATH='test123'
 
 
@@ -54,7 +54,7 @@ PYTHONUNBUFFERED=1 uv run --isolated --directory . --frozen --env-file .env -m v
     actor_rollout_ref.actor.clip_ratio_high=$CLIP_RATIO_HIGH \
     actor_rollout_ref.rollout.log_prob_micro_batch_size_per_gpu=1 \
     actor_rollout_ref.rollout.tensor_model_parallel_size=$TP_SIZE \
-    actor_rollout_ref.rollout.name=sync_simple_explore \
+    actor_rollout_ref.rollout.name=async_simple_explore \
     actor_rollout_ref.rollout.gpu_memory_utilization=$GPU_MEM_UTIL \
     actor_rollout_ref.rollout.n=1 \
     actor_rollout_ref.rollout.n_trajectories=$NUM_TRAJ \
