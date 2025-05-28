@@ -8,6 +8,7 @@ from json import JSONDecodeError
 
 import torch
 import sglang as sgl
+from vllm import LLM, SamplingParams
 import torch.distributed
 from omegaconf import DictConfig
 from sglang.srt.function_call_parser import FunctionCallParser
@@ -55,24 +56,18 @@ class SyncSimpleExploreRollout(BaseRollout):
         torch.distributed.barrier()
         # print(f"nodedup in async rollout {os.environ['CUDA_VISIBLE_DEVICES']=} @ {torch.distributed.get_rank()=} {self.tp_rank=}")
         if self.tp_rank == 0:
-            self.engine = sgl.Engine(
-                model_path=model_path,
-                port=40000,
-                dtype=config.dtype,
-                max_total_tokens=60*self.total_len,
-                max_prefill_tokens=2*self.total_len,
-                enable_memory_saver=config.enable_memory_saver,
-                mem_fraction_static=config.gpu_memory_utilization,
-                tp_size=device_mesh.size(1),
-                log_level="INFO",
-                # enable_metrics=True,
+            self.engine = LLM(
+                model=model_path,
+                dtype=config.dtype,  # e.g. "float16"
+                tensor_parallel_size=device_mesh.size(1),
+                max_num_batched_tokens=60 * self.total_len,
+                gpu_memory_utilization=config.gpu_memory_utilization,
+                trust_remote_code=True,
             )
-            print(f"nodedup {torch.distributed.get_rank() = } releasing memory occupation")
-            self.engine.release_memory_occupation()
-            print(f"nodedup {torch.distributed.get_rank() = } engine initialized")
+            print(f"nodedup {torch.distributed.get_rank() = } vLLM engine initialized")
         else:
             self.engine = None
-        self.engine: sgl.srt.entrypoints.engine.Engine | None
+        self.engine: LLM | None
         os.environ["CUDA_VISIBLE_DEVICES"] = cuda_visible_device
         torch.distributed.barrier()
         self.config = config
