@@ -549,8 +549,8 @@ class SimpleExploreAgentGroup:
     def generate(self, prompts, sampling_params):
         print(f"Generating response for instance")
         sampling_params = SamplingParams(**sampling_params)
-        res = self.infer_engine.generate(prompts, sampling_params=sampling_params)
-        response_strs = [result["text"] for result in res]
+        outputs = self.infer_engine.generate(prompts, sampling_params=sampling_params)
+        response_strs = [output.outputs[0].text for output in outputs]
         print(f"Generated response for instance")
         print(response_strs)
         print(f"Generated {len(response_strs)} responses")
