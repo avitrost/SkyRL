@@ -516,6 +516,35 @@ class SimpleExploreAgentGroup:
         
         return result_dataproto
 
+    def _prepare_input(self) -> str:
+        """Prepare input for the model, returning text."""
+        # Format the template with current state values
+        formatted_history = "\n".join(
+            [f"Turn {i}: {answer}" for i, answer in enumerate(self.history)]
+        )
+        input_text = SIMPLE_EXPLORE_TEMPLATE.format(
+            prompt=self.prompt,
+            history=formatted_history
+        )
+
+        return input_text
+    
+    def _parse_response(self, response_str: str) -> Optional[str]:  # TODO: don't hardcode
+        # Parse answer
+        def parse_answer(response_str: str) -> str:
+            """Extract the answer from between <answer> and </answer> tags."""
+            answer_match = re.search(r'<answer>(.*?)</answer>', response_str, re.DOTALL)
+            if answer_match:
+                return answer_match.group(1).strip()
+            else:
+                return None
+        answer = parse_answer(response_str)
+        if answer is None:
+            print(f"Failed to parse answer from response")
+            logger.warning(f"Failed to parse answer from response: {response_str}")
+
+        return answer
+
     def generate(self, prompts, sampling_params):
         print(f"Generating response for instance {self.instance_id}, trajectory {self.trajectory_id}")
         res = self.infer_engine.generate(prompts=prompts, sampling_params=sampling_params)
@@ -546,14 +575,14 @@ class SimpleExploreAgentGroup:
                 }
             ]
             turn_return_val = {
-                'instance_id': self.instance_id,
-                'trajectory_id': self.trajectory_id,
+                'instance_id': instance_id,
+                'trajectory_id': trajectory_id,
                 'turn': turn,
                 'messages': messages,
                 'history': self.history[instance_id][trajectory_id],
             }
             self.results[instance_id][trajectory_id].append(turn_return_val)
-            self.re.append(turn_return_val)
+        print(f"Exploration for trajectory {trajectory_id} at turn {turn} completed for all instances in the batch.")
     
     def generate_trajectories_pipeline(self) -> Dict[int, Dict[int, Dict[str, Any]]]:
         """
