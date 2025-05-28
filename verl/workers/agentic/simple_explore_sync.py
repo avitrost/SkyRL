@@ -516,14 +516,14 @@ class SimpleExploreAgentGroup:
         
         return result_dataproto
 
-    def _prepare_input(self) -> str:
+    def _prepare_input(self, prompt: str, history: List[Optional[str]]) -> str:
         """Prepare input for the model, returning text."""
         # Format the template with current state values
         formatted_history = "\n".join(
-            [f"Turn {i}: {answer}" for i, answer in enumerate(self.history)]
+            [f"Turn {i}: {answer}" for i, answer in enumerate(history)]
         )
         input_text = SIMPLE_EXPLORE_TEMPLATE.format(
-            prompt=self.prompt,
+            prompt=prompt,
             history=formatted_history
         )
 
@@ -556,8 +556,10 @@ class SimpleExploreAgentGroup:
     def explore(self, batch, trajectory_id, turn):
         prompts = []
         for i, data_item in enumerate(batch):
+            instance_id = data_item.non_tensor_batch['index']
             prompt = data_item.non_tensor_batch['raw_prompt'][0]['content']
-            input_text = self._prepare_input(prompt)  # from history
+            history = self.history[instance_id][trajectory_id]
+            input_text = self._prepare_input(prompt, history)
             prompts.append(input_text)
         response_strs = self.generate(prompts=prompts, sampling_params=self.sampling_params) # batched
         for i, response_str in enumerate(response_strs):
