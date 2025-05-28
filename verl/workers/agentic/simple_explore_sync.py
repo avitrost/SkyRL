@@ -546,10 +546,10 @@ class SimpleExploreAgentGroup:
         return answer
 
     def generate(self, prompts, sampling_params):
-        print(f"Generating response for instance {self.instance_id}, trajectory {self.trajectory_id}")
+        print(f"Generating response for instance")
         res = self.infer_engine.generate(prompts=prompts, sampling_params=sampling_params)
         response_str = res["text"]
-        print(f"Generated response for instance {self.instance_id}, trajectory {self.trajectory_id}")
+        print(f"Generated response for instance")
         return response_str
     
 
