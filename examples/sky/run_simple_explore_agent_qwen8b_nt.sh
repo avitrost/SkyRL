@@ -1,13 +1,13 @@
 PROJECT_NAME='simple-explore-training-qwen3-no-thinking-8b-grpo'
 EXPERIMENT_NAME='simple-explore-training-qwen3-8b-32bsz-16r-temp0.6-25turn-easy'
 DATA_PATH="gsm8k"
-SFT_MODEL_PATH='Qwen/Qwen2.5-0.5B' 
+SFT_MODEL_PATH='Qwen/Qwen3-8B' 
 CKPT_PATH='test123'
 
 
-BATCH_SIZE=32 # 32
-MAX_NUM_ITERS=25 # 25
-NUM_TRAJ=8 # 8
+BATCH_SIZE=4 # 32
+MAX_NUM_ITERS=2 # 25
+NUM_TRAJ=2 # 8
 MAX_PARALLEL_AGENTS=1 # 64
 SAVE_FREQ=1
 
