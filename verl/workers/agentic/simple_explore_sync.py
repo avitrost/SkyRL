@@ -356,9 +356,6 @@ class SimpleExploreAgentGroup:
         self.history = {}  # Initialize history for each instance
         
         self.qwen3_enable_thinking = qwen3_enable_thinking
-        
-        # Initialize agents for each instance
-        self._initialize_agents()
 
         self.remove_think_tokens = remove_think_tokens
         if self.remove_think_tokens:
