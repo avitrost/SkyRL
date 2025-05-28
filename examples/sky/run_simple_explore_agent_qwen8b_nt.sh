@@ -1,7 +1,7 @@
 PROJECT_NAME='simple-explore-training-qwen3-no-thinking-8b-grpo'
 EXPERIMENT_NAME='simple-explore-training-qwen3-8b-32bsz-16r-temp0.6-25turn-easy'
 DATA_PATH="gsm8k"
-SFT_MODEL_PATH='Qwen/Qwen2.5-Math-7B' 
+SFT_MODEL_PATH='Qwen/Qwen2.5-3B' 
 CKPT_PATH='test123'
 
 
