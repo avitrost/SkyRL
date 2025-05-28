@@ -422,16 +422,11 @@ class ActorRolloutRefWorker(Worker):
             local_path = copy_to_local(self.config.model.path)
             # print(f"nodedup creating async rollout instance, {torch.distributed.get_rank()=} {rollout_device_mesh.get_rank()=} {rollout_device_mesh.shape=}")
             rollout = SyncSimpleExploreRollout(model_path=local_path, config=self.config.rollout, device_mesh=rollout_device_mesh)
-            rollout_sharding_manager = FSDPVLLMShardingManager(
-                module=self.actor_module_fsdp,
-                inference_engine=rollout.engine,
-                model_config=self.actor_model_config,
-                full_params='hf' in self.config.rollout.load_format,
-                device_mesh=rollout_device_mesh,
-                role=self.role,
-                rollout_count=rollout_device_mesh.size(0),
-                exchange_size=self.config.get("exchange_size"),
-            )
+            rollout_sharding_manager = FSDPVLLMShardingManager(module=self.actor_module_fsdp,
+                                                               inference_engine=rollout.inference_engine,
+                                                               model_config=self.actor_model_config,
+                                                               full_params='hf' in self.config.rollout.load_format,
+                                                               device_mesh=rollout_device_mesh)
         else:
             raise NotImplementedError(f"Rollout name: {self.config.rollout.name} is not supported")
         return rollout, rollout_sharding_manager
