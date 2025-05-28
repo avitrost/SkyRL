@@ -5,7 +5,7 @@ SFT_MODEL_PATH='Qwen/Qwen2.5-0.5B'
 CKPT_PATH='test123'
 
 
-BATCH_SIZE=2 # 32
+BATCH_SIZE=4 # 32
 MAX_NUM_ITERS=1 # 25
 NUM_TRAJ=1 # 8
 MAX_PARALLEL_AGENTS=1 # 64
@@ -54,7 +54,7 @@ PYTHONUNBUFFERED=1 uv run --isolated --directory . --frozen --env-file .env -m v
     actor_rollout_ref.actor.clip_ratio_high=$CLIP_RATIO_HIGH \
     actor_rollout_ref.rollout.log_prob_micro_batch_size_per_gpu=1 \
     actor_rollout_ref.rollout.tensor_model_parallel_size=$TP_SIZE \
-    actor_rollout_ref.rollout.name=async_simple_explore \
+    actor_rollout_ref.rollout.name=sync_simple_explore \
     actor_rollout_ref.rollout.gpu_memory_utilization=$GPU_MEM_UTIL \
     actor_rollout_ref.rollout.n=1 \
     actor_rollout_ref.rollout.n_trajectories=$NUM_TRAJ \
