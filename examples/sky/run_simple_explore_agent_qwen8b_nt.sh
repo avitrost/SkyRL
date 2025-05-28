@@ -1,7 +1,7 @@
 PROJECT_NAME='simple-explore-training-qwen3-no-thinking-8b-grpo'
 EXPERIMENT_NAME='simple-explore-training-qwen3-8b-32bsz-16r-temp0.6-25turn-easy'
 DATA_PATH="gsm8k"
-SFT_MODEL_PATH='Qwen/Qwen3-8B' 
+SFT_MODEL_PATH='Qwen/Qwen2.5-Math-7B' 
 CKPT_PATH='test123'
 
 
@@ -68,7 +68,6 @@ PYTHONUNBUFFERED=1 uv run --isolated --directory . --frozen --env-file .env -m v
     actor_rollout_ref.rollout.max_iterations=$MAX_NUM_ITERS \
     actor_rollout_ref.rollout.enable_memory_saver=True \
     actor_rollout_ref.rollout.qwen3_enable_thinking=False \
-    actor_rollout_ref.rollout.enforce_eager=True \
     +actor_rollout_ref.rollout.max_starting_message_length=12000 \
     actor_rollout_ref.actor.masking=True \
     actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu=1 \
