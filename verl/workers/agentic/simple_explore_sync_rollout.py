@@ -61,6 +61,7 @@ class SyncSimpleExploreRollout(BaseRollout):
                 dtype=config.dtype,  # e.g. "float16"
                 tensor_parallel_size=device_mesh.size(1),
                 max_num_batched_tokens=config.max_num_batched_tokens,
+                max_model_len=config.max_model_len,
                 gpu_memory_utilization=config.gpu_memory_utilization,
                 trust_remote_code=True,
             )
