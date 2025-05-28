@@ -102,7 +102,7 @@ class SyncSimpleExploreRollout(BaseRollout):
             max_parallel_agents=self.config.max_parallel_agents // self.device_mesh.size(0),
             max_eval_parallel_agents=self.config.max_eval_parallel_agents // self.device_mesh.size(0),
             max_iterations = self.config.max_iterations,
-            tokenizer=self.engine.model.tokenizer,
+            tokenizer=self.engine.get_tokenizer(),
             sampling_params=sampling_params,
             device=device,
             remove_think_tokens=self.config.remove_think_tokens,
