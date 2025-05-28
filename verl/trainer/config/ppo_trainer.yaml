@@ -91,7 +91,6 @@ actor_rollout_ref:
     # for vllm rollout
     dtype: bfloat16 # should align with FSDP
     gpu_memory_utilization: 0.5
-    enable_sleep_mode: True
     ignore_eos: False
     enforce_eager: True
     free_cache_engine: True
