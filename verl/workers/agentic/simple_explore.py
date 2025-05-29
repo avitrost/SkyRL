@@ -262,7 +262,7 @@ class SimpleExploreAgent:
         return response_str
     
     async def explore(self, turn: int) -> Dict[str, Any]:
-        print(f"Exploring instance {self.instance_id}, trajectory {self.trajectory_id}, iteration {i}/{self.max_iterations}")
+        print(f"Exploring instance {self.instance_id}, trajectory {self.trajectory_id}, iteration {turn}/{self.max_iterations}")
         # Generate the next step
         input_text = self._prepare_input()  # from history
         print(f"Input text for generation {turn}:", input_text)
