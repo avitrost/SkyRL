@@ -261,37 +261,33 @@ class SimpleExploreAgent:
         print(f"Generated response for instance {self.instance_id}, trajectory {self.trajectory_id}")
         return response_str
     
-    async def explore(self):
-        return_vals = []
-        for i in range(self.max_iterations):
-            print(f"Exploring instance {self.instance_id}, trajectory {self.trajectory_id}, iteration {i}/{self.max_iterations}")
-            # Generate the next step
-            input_text = self._prepare_input()  # from history
-            print(f"Input text for generation {i}:", input_text)
-            response_str = await self.generate(prompt=input_text, sampling_params=self.sampling_params)
-            # response_str = call_async_from_sync(self.generate, prompt=input_text, sampling_params=self.sampling_params)
-            print("GOT A RESPONSE STRING")
-            extracted_answer = self._parse_response(response_str)
-            self.history.append(extracted_answer)  # update history
-            messages = [
-                {
-                    'role': 'user',
-                    'content': input_text,
-                },
-                {
-                    'role': 'assistant',
-                    'content': response_str,
-                }
-            ]
-            turn_return_val = {
-                'instance_id': self.instance_id,
-                'trajectory_id': self.trajectory_id,
-                'messages': messages,
-                'history': self.history,
+    async def explore(self, turn: int) -> Dict[str, Any]:
+        print(f"Exploring instance {self.instance_id}, trajectory {self.trajectory_id}, iteration {i}/{self.max_iterations}")
+        # Generate the next step
+        input_text = self._prepare_input()  # from history
+        print(f"Input text for generation {turn}:", input_text)
+        response_str = await self.generate(prompt=input_text, sampling_params=self.sampling_params)
+        # response_str = call_async_from_sync(self.generate, prompt=input_text, sampling_params=self.sampling_params)
+        print("GOT A RESPONSE STRING")
+        extracted_answer = self._parse_response(response_str)
+        self.history.append(extracted_answer)  # update history
+        messages = [
+            {
+                'role': 'user',
+                'content': input_text,
+            },
+            {
+                'role': 'assistant',
+                'content': response_str,
             }
-            return_vals.append(turn_return_val)
-        print("GOT ALL RETURN VALS")
-        return return_vals
+        ]
+        turn_return_val = {
+            'instance_id': self.instance_id,
+            'trajectory_id': self.trajectory_id,
+            'messages': messages,
+            'history': self.history,
+        }
+        return turn_return_val
 
 class SimpleExploreAgentGroup:
     """
@@ -541,19 +537,19 @@ class SimpleExploreAgentGroup:
                 # Set the instance data for each agent
                 self.agents[instance_id][n].max_iterations = self.max_iterations
 
-    async def _run_agent(self, batch_id: int, trajectory_id: int) -> Dict[str, Any]:
+    async def _run_agent(self, batch_id: int, trajectory_id: int, turn: int) -> Dict[str, Any]:
         instance_id = self.batch[batch_id].non_tensor_batch['index']
         """Run a single agent to completion and return the results."""
         agent = self.agents[instance_id][trajectory_id]
         assert agent is not None
 
         # return_vals = await call_sync_from_async(SimpleExploreAgent.explore, agent)
-        return_vals = await agent.explore()
+        return_val = await agent.explore(turn)
         print(f"Agent for instance {instance_id}, trajectory {trajectory_id} completed")
         # print(f"Return values: {return_vals}")
         print("************************************")
 
-        return return_vals
+        self.results[instance_id][trajectory_id].append(return_val)
     
 
     async def generate_trajectories_pipeline(self) -> Dict[int, Dict[int, Dict[str, Any]]]:
@@ -562,94 +558,25 @@ class SimpleExploreAgentGroup:
         """
         total_instances = len(self.batch)
         print("Total instances:", total_instances)
-        print("*************************************")
-        print("*************************************")
-        print("*************************************")
-        print("*************************************")
         
         # Only need the run queue
         # run_queue = asyncio.Queue(maxsize=self.max_parallel_agents)
-        run_queue = asyncio.Queue(maxsize=0)
 
-
-        print("queue created")
-        
-        # Fill the run queue
-        for trajectory_id in range(self.num_trajectories):
-            for batch_idx in range(total_instances):
-                await run_queue.put((batch_idx, trajectory_id))
-
-        print("queue filled")
-        
-        # Track active tasks
-        active_run_tasks = set()
-        needed_run_tasks = self.num_trajectories * total_instances  # Total tasks we'll eventually need   
-        
-        # Helper function to run one agent
-        async def run_one_agent():
-            print("Waiting for a task to run")
-            print("**************************************")
-            print("**************************************")
-            print("**************************************")
-            batch_idx, trajectory_id = await run_queue.get()
-            print("Got a task to run")
+        # Initialize results dictionary
+        for batch_idx in range(total_instances):
             instance_id = self.batch[batch_idx].non_tensor_batch['index']
-            start_time = time.time()
-            try:
-                logger.info(f"Running agent for instance {instance_id}, trajectory {trajectory_id}")
-                result = await self._run_agent(batch_idx, trajectory_id)
-                elapsed = time.time() - start_time
-                
-                # Store the result
-                if instance_id not in self.results:
-                    self.results[instance_id] = {}
-                self.results[instance_id][trajectory_id] = result
-                
-                print(f"Successfully completed instance {instance_id}, trajectory {trajectory_id} in {elapsed:.2f}s")
-            except Exception as e:
-                print(f"[ERROR] Error running agent for instance {instance_id}, trajectory {trajectory_id}: {str(e)}")
-                logger.error(f"[This line should not be reached!!] Error running agent for {instance_id}, trajectory {trajectory_id}: {str(e)}")
-                # Store error result
-                raise e
-            finally:
-                print('Task done, removing from queue')
-                run_queue.task_done()
-                print("Finished task done, removing from queue")
-                nonlocal needed_run_tasks
-                # Start another run task if available
-                if needed_run_tasks > 0:
-                    print(f"Starting another run task, {needed_run_tasks} remaining")
-                    needed_run_tasks -= 1
-                    task = asyncio.create_task(run_one_agent())
-                    print(f"New task created, {needed_run_tasks} remaining")
-                    active_run_tasks.add(task)
-                    print(f"New task added to active tasks, {len(active_run_tasks)} total active tasks")
-                    task.add_done_callback(lambda t: active_run_tasks.discard(t))
-        
-        # Start a few agent run tasks (they'll wait on the run_queue)
-        for i in range(self.max_parallel_agents):
-            print(f"Starting initial run task {i}")
-            needed_run_tasks -= 1
-            task = asyncio.create_task(run_one_agent())
-            print(f"Task {i} created")
-            active_run_tasks.add(task)
-            print(f"Task {i} added to active tasks")
-            task.add_done_callback(lambda t: active_run_tasks.discard(t))
-            print(f"Task {i} added done callback")
-        
-        # Wait for all run tasks to complete
-        if run_queue.qsize() > 0:
-            print(f"Waiting for {run_queue.qsize()} tasks to complete")
-            await run_queue.join()
-        print("All tasks in queue completed")
-        
-        # Wait for any remaining active tasks
-        all_tasks = active_run_tasks
-        if all_tasks:
-            print(f"Waiting for {len(all_tasks)} active tasks to complete")
-            logger.info(f"Waiting for {len(all_tasks)} (run: {len(active_run_tasks)}) remaining tasks to complete")
-            await asyncio.wait(all_tasks)
-        
+            self.results[instance_id] = {}
+            for trajectory_id in range(self.num_trajectories):
+                self.results[instance_id][trajectory_id] = []
+
+        for turn in range(self.max_iterations):
+            print(f"Starting iteration {turn + 1}/{self.max_iterations}")
+            async with asyncio.TaskGroup() as tg:
+                for batch_idx in range(total_instances):
+                    for trajectory_id in range(self.num_trajectories):
+                        # Create a task for each agent
+                        tg.create_task(self._run_agent(batch_idx, trajectory_id, turn))
+                        
         print("All tasks completed")
         results_dataproto = self._convert_results_to_dataproto()
         print("Results converted to DataProto format")
@@ -673,10 +600,4 @@ class SimpleExploreAgentGroup:
             asyncio.set_event_loop(loop)
             
         # Run the generate_trajectories coroutine in the event loop
-        try:
-            return loop.run_until_complete(self.generate_trajectories_pipeline())
-        finally:
-            # Close the batch manager to ensure cleanup
-            # self.close()
-            # loop.close()
-            pass
+        return loop.run_until_complete(self.generate_trajectories_pipeline())
