@@ -972,7 +972,15 @@ class RayPPOTrainer(object):
                     batch.non_tensor_batch['uid'] = np.array([str(uuid.uuid4()) for _ in range(len(batch.batch))],
                                                              dtype=object)
                     # repeat to align with repeated responses in rollout
+                    print("************************")
+                    print("ORIGINAL BATCH")
+                    print(batch)
+                    print("************************")
+                    print("GEN BATCH OUTPUT")
+                    print(gen_batch_output)
+                    print("************************")
                     batch = batch.repeat(repeat_times=self.config.actor_rollout_ref.rollout.n_trajectories, interleave=True)
+
                     batch = batch.union(gen_batch_output)
 
                     # batch.batch['response_mask'] = compute_response_mask(batch)
