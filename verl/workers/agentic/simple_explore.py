@@ -434,6 +434,7 @@ class SimpleExploreAgentGroup:
         all_messages = []
         all_prompts = []
         all_responses = []
+        all_trajectory_ids = []
         # TODO: iterate through each inner list
         for result_series in matched_results:
             for result in result_series:
@@ -456,6 +457,7 @@ class SimpleExploreAgentGroup:
 
                 # Also add non-tensor data
                 history_list.append(result.get('history', None))
+                all_trajectory_ids.append(result.get('trajectory_id', None))
 
 
         # Encode messages, get assitant mask and position ids
@@ -503,6 +505,7 @@ class SimpleExploreAgentGroup:
         # Create non-tensor dictionary
         non_tensor_dict = {
             'history': history_list,
+            'trajectory_ids': all_trajectory_ids,
         }
         
         # Create and return DataProto
