@@ -973,7 +973,6 @@ class RayPPOTrainer(object):
                                                              dtype=object)
                     # repeat to align with repeated responses in rollout
                     batch = batch.repeat(repeat_times=self.config.actor_rollout_ref.rollout.n_trajectories, interleave=True)
-                    batch = batch.repeat(repeat_times=self.config.actor_rollout_ref.rollout.max_iterations, interleave=True)
                     batch = batch.union(gen_batch_output)
 
                     # batch.batch['response_mask'] = compute_response_mask(batch)

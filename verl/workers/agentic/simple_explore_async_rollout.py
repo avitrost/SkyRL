@@ -95,9 +95,11 @@ class AsyncSimpleExploreRollout(BaseRollout):
         print("final sampling params:", sampling_params)
         device = torch.cuda.current_device()
 
+        do_sample = prompts.meta_info.get("do_sample", True)
+
         simple_explore_agent_group = SimpleExploreAgentGroup(
             batch=prompts,
-            num_trajectories=self.config.n_trajectories,
+            num_trajectories=self.config.n_trajectories if not do_sample else 1,
             infer_engine=self.engine,
             max_prompt_length=self.config.prompt_length,
             max_response_length=self.config.response_length,
