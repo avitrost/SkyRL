@@ -39,6 +39,7 @@ SIMPLE_EXPLORE_TEMPLATE = """
     
     Respond in the following format, using careful step-by-step reasoning.
     The <history> tag contains the history of previous attempted answers, which you can use to inform your reasoning.
+    Inside the <answer> tag, put your final answer inside \\boxed{} format.
     It is critical that the answer provided in the <answer> tag is DIFFERENT from the previous attempts; all that matters is that one of the total attempts is correct.
 
     <reasoning>

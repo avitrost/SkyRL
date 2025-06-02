@@ -980,6 +980,7 @@ class RayPPOTrainer(object):
                     print(gen_batch_output)
                     print("************************")
                     batch = batch.repeat(repeat_times=self.config.actor_rollout_ref.rollout.n_trajectories, interleave=True)
+                    batch = batch.repeat(repeat_times=self.config.actor_rollout_ref.rollout.max_iterations, interleave=True) # TODO: check order
 
                     batch = batch.union(gen_batch_output)
 
