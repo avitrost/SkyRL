@@ -373,6 +373,10 @@ class SimpleExploreAgentGroup:
 
         # Non-tensor data
         history_list = []
+
+        print('RESULTS')
+        print(self.results)
+        print('DONE RESULTS')
         
         # Create a mapping of instance_id -> list of trajectories
         instance_trajectories = {}
