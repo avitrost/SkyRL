@@ -573,7 +573,7 @@ class SimpleExploreAgentGroup:
         for batch_idx in range(total_instances):
             instance_id = self.batch[batch_idx].non_tensor_batch['index']
             self.results[instance_id] = {}
-            for trajectory_id in range(1, self.num_trajectories):
+            for trajectory_id in range(self.num_trajectories):
                 self.results[instance_id][trajectory_id] = []
 
         for turn in range(self.max_iterations):
