@@ -579,10 +579,15 @@ class SimpleExploreAgentGroup:
         for turn in range(self.max_iterations):
             print(f"Starting iteration {turn + 1}/{self.max_iterations}")
             async with asyncio.TaskGroup() as tg:
+                print('started task group')
                 for batch_idx in range(total_instances):
+                    print(f'batch_idx {batch_idx}')
+                    print(f'num trajectories {self.num_trajectories}')
                     for trajectory_id in range(1, self.num_trajectories):
+                        print(f'trajectory_id {trajectory_id}')
                         # Create a task for each agent
                         tg.create_task(self._run_agent(batch_idx, trajectory_id, turn))
+                        print('created task')
                         
         print("All tasks completed")
         results_dataproto = self._convert_results_to_dataproto()
