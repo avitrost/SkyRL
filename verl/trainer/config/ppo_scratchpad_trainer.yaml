@@ -113,7 +113,7 @@ actor_rollout_ref:
     sampling_params:
       temperature: 1.0
       top_p: 0.95
-      max_tokens: ${data.max_response_length}
+      max_new_tokens: ${data.max_response_length}
       top_k: -1 # -1 is disable
       min_p: 0
       repetition_penalty: 1
