@@ -37,7 +37,8 @@ class ExploreRewardManager:
                  num_examine,
                  compute_score=None,
                  reward_fn_key='data_source',
-                 use_parallel=False) -> None:
+                 use_parallel=False,
+                 config=None) -> None:
         self.tokenizer = tokenizer
         self.num_examine = num_examine  # the number of batches of decoded responses to print to the console
         self.compute_score = explore_compute_score
