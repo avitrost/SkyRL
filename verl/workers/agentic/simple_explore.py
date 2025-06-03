@@ -525,10 +525,6 @@ class SimpleExploreAgentGroup:
             self.agents[instance_id] = {}
             prompt = data_item.non_tensor_batch['raw_prompt'][0]['content']
             for n in range(self.num_trajectories):
-                print('************************************')
-                print('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
-                print('************************************')
-                print(f"Creating agent for instance {instance_id}, trajectory {n}")
                 self.agents[instance_id][n] = SimpleExploreAgent(
                     instance_id=instance_id,
                     trajectory_id=n,
