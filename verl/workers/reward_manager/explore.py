@@ -91,10 +91,12 @@ class ExploreRewardManager:
 
             reward_tensor[i, valid_response_length - 1] = reward
 
+        reward_tensor_dict = {"all": reward_tensor}
+
         if return_dict:
             return {
                 "reward_tensor": reward_tensor,
                 "reward_extra_info": reward_extra_info,
             }
         else:
-            return reward_tensor, {}
+            return reward_tensor_dict, {}
