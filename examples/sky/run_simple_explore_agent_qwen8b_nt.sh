@@ -1,15 +1,15 @@
 PROJECT_NAME='simple-explore-training-qwen3-no-thinking-8b-grpo'
-EXPERIMENT_NAME='simple-explore-training-qwen3-8b-32bsz-16r-temp0.6-25turn-easy'
+EXPERIMENT_NAME='simple-explore-training-qwen3-8b-32bsz-16r-temp0.6-10turn-easy'
 DATA_PATH="gsm8k"
-SFT_MODEL_PATH='Qwen/Qwen3-4B' 
-CKPT_PATH='test123'
+SFT_MODEL_PATH='Qwen/Qwen3-8B' 
+CKPT_PATH='test1234'
 
 
-BATCH_SIZE=8 # 32
-MAX_NUM_ITERS=11 # 25
-NUM_TRAJ=2 # 8
+BATCH_SIZE=32 # 32
+MAX_NUM_ITERS=10 # 25
+NUM_TRAJ=8 # 8
 MAX_PARALLEL_AGENTS=1 # 64
-SAVE_FREQ=1
+SAVE_FREQ=10
 
 USE_KL_LOSS=True
 KL_LOSS_COEF=0.001
@@ -35,7 +35,7 @@ PYTHONUNBUFFERED=1 uv run --isolated --directory . --frozen --env-file .env -m v
     data.val_files=["$DATA_PATH/test.parquet"] \
     data.train_batch_size=$BATCH_SIZE \
     data.max_prompt_length=31232 \
-    data.max_response_length=128 \
+    data.max_response_length=1536 \
     data.truncation='error' \
     actor_rollout_ref.model.path=$SFT_MODEL_PATH \
     actor_rollout_ref.actor.optim.lr=1e-6 \
