@@ -12,11 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-try:
-    from math_verify.metric import math_metric
-    from math_verify.parser import LatexExtractionConfig, ExprExtractionConfig
-except ImportError:
-    print("To use Math-Verify, please install it first by running `pip install math-verify`.")
+from math_verify.metric import math_metric
+from math_verify.parser import LatexExtractionConfig, ExprExtractionConfig
 
 
 def is_equiv(output_1: str, output_2: str) -> bool:
