@@ -97,4 +97,4 @@ class ExploreRewardManager:
                 "reward_extra_info": reward_extra_info,
             }
         else:
-            return reward_tensor
+            return reward_tensor, {}
