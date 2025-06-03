@@ -250,26 +250,27 @@ class SimpleExploreAgent:
                 return None
         answer = parse_answer(response_str)
         if answer is None:
-            print(f"Failed to parse answer from response")
-            logger.warning(f"Failed to parse answer from response: {response_str}")
+            # print(f"Failed to parse answer from response")
+            # logger.warning(f"Failed to parse answer from response: {response_str}")
+            pass
 
         return answer
     
     async def generate(self, prompt, sampling_params):
-        print(f"Generating response for instance {self.instance_id}, trajectory {self.trajectory_id}")
+        # print(f"Generating response for instance {self.instance_id}, trajectory {self.trajectory_id}")
         res = await self.infer_engine.async_generate(prompt=prompt, sampling_params=sampling_params)
         response_str = res["text"]
-        print(f"Generated response for instance {self.instance_id}, trajectory {self.trajectory_id}")
+        # print(f"Generated response for instance {self.instance_id}, trajectory {self.trajectory_id}")
         return response_str
     
     async def explore(self, turn: int) -> Dict[str, Any]:
-        print(f"Exploring instance {self.instance_id}, trajectory {self.trajectory_id}, iteration {turn}/{self.max_iterations}")
+        # print(f"Exploring instance {self.instance_id}, trajectory {self.trajectory_id}, iteration {turn}/{self.max_iterations}")
         # Generate the next step
         input_text = self._prepare_input()  # from history
-        print(f"Input text for generation {turn}:", input_text)
+        # print(f"Input text for generation {turn}:", input_text)
         response_str = await self.generate(prompt=input_text, sampling_params=self.sampling_params)
         # response_str = call_async_from_sync(self.generate, prompt=input_text, sampling_params=self.sampling_params)
-        print("GOT A RESPONSE STRING")
+        # print("GOT A RESPONSE STRING")
         extracted_answer = self._parse_response(response_str)
         self.history.append(extracted_answer)  # update history
         messages = [
@@ -374,10 +375,6 @@ class SimpleExploreAgentGroup:
 
         # Non-tensor data
         history_list = []
-
-        print('RESULTS')
-        print(self.results)
-        print('DONE RESULTS')
         
         # Create a mapping of instance_id -> list of trajectories
         instance_trajectories = {}
@@ -553,9 +550,7 @@ class SimpleExploreAgentGroup:
 
         # return_vals = await call_sync_from_async(SimpleExploreAgent.explore, agent)
         return_val = await agent.explore(turn)
-        print(f"Agent for instance {instance_id}, trajectory {trajectory_id} completed")
         # print(f"Return values: {return_vals}")
-        print("************************************")
 
         self.results[instance_id][trajectory_id].append(return_val)
     
@@ -565,7 +560,6 @@ class SimpleExploreAgentGroup:
         Generate trajectories with pipelined runtime initialization to improve efficiency.
         """
         total_instances = len(self.batch)
-        print("Total instances:", total_instances)
         
         # Only need the run queue
         # run_queue = asyncio.Queue(maxsize=self.max_parallel_agents)
@@ -578,21 +572,13 @@ class SimpleExploreAgentGroup:
                 self.results[instance_id][trajectory_id] = []
 
         for turn in range(self.max_iterations):
-            print(f"Starting iteration {turn + 1}/{self.max_iterations}")
             async with asyncio.TaskGroup() as tg:
-                print('started task group')
                 for batch_idx in range(total_instances):
-                    print(f'batch_idx {batch_idx}')
-                    print(f'num trajectories {self.num_trajectories}')
                     for trajectory_id in range(self.num_trajectories):
-                        print(f'trajectory_id {trajectory_id}')
                         # Create a task for each agent
                         tg.create_task(self._run_agent(batch_idx, trajectory_id, turn))
-                        print('created task')
                         
-        print("All tasks completed")
         results_dataproto = self._convert_results_to_dataproto()
-        print("Results converted to DataProto format")
         return results_dataproto
 
     def run(self) -> Dict[int, Dict[int, Dict[str, Any]]]:
@@ -602,8 +588,6 @@ class SimpleExploreAgentGroup:
         Returns:
             Dict mapping instance ID to a dict of trajectory ID to results
         """
-        print('IN THE RUN FUNCTION')
-        print('************************************')
         try:
             # Try to get the current event loop
             loop = asyncio.get_event_loop()
