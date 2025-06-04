@@ -72,6 +72,7 @@ PYTHONUNBUFFERED=1 uv run --isolated --directory . --frozen --env-file .env -m v
     actor_rollout_ref.actor.masking=True \
     actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu=4 \
     actor_rollout_ref.ref.fsdp_config.param_offload=True \
+    critic.ppo_micro_batch_size_per_gpu=4 \
     reward_model.reward_manager="explore" \
     algorithm.use_kl_in_reward=False \
     trainer.critic_warmup=0 \
