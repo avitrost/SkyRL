@@ -4,7 +4,7 @@ codetiming
 datasets
 dill
 flash-attn
-hydra-core>=1.3.2
+hydra-core
 liger-kernel
 math-verify[antlr4_13_2]
 numpy
