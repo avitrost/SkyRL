@@ -42,7 +42,7 @@ if __name__ == '__main__':
 
     dataset = datasets.load_dataset(data_source, 'en')['train']
 
-    train_dataset, test_dataset = dataset.train_test_split(test_size=0.1, seed=42).values()
+    train_dataset, test_dataset = dataset.train_test_split(test_size=0.00175, seed=42).values()
 
     # instruction_following = "Let's think step by step and output the final answer after \"####\"."
 

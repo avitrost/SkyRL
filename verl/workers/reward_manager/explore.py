@@ -52,15 +52,30 @@ class ExploreRewardManager:
         reward_tensor = torch.zeros_like(data.batch['responses'], dtype=torch.float32)
         reward_extra_info = defaultdict(list)
 
-        # already_print_data_sources = {}
+        already_print_data_sources = {}
 
         import concurrent.futures
 
         def compute_score_for_item(i, data_item):
             history = data_item.non_tensor_batch['history']
 
+            prompt_ids = data_item.batch['prompts']
+            prompt_length = prompt_ids.shape[-1]
+            valid_prompt_length = data_item.batch['attention_mask'][:prompt_length].sum()
+            valid_prompt_ids = prompt_ids[-valid_prompt_length:]
+
+            response_ids = data_item.batch['responses']
+            valid_response_length = data_item.batch['attention_mask'][prompt_length:].sum()
+            valid_response_ids = response_ids[:valid_response_length]
+
+            # decode
+            prompt_str = self.tokenizer.decode(valid_prompt_ids, skip_special_tokens=True)
+            response_str = self.tokenizer.decode(valid_response_ids, skip_special_tokens=True)
+
+            ground_truth = data_item.non_tensor_batch['reward_model']['ground_truth']
+
             # print(f"naive reward manager {self.tokenizer=}")
-            # data_source = data_item.non_tensor_batch[self.reward_fn_key]
+            data_source = data_item.non_tensor_batch[self.reward_fn_key]
 
             response_ids = data.batch['responses']
             response_length = response_ids.shape[-1]
@@ -72,7 +87,7 @@ class ExploreRewardManager:
             # print(f"naive reward manager {self.tokenizer=}")
             score = self.compute_score(history=history)
 
-            return i, score, valid_response_length
+            return i, valid_response_length, score, data_source, prompt_str, response_str, ground_truth
 
         if self.use_parallel:
             with concurrent.futures.ThreadPoolExecutor(max_workers=len(data)) as executor:
@@ -81,7 +96,7 @@ class ExploreRewardManager:
         else:
             results = [compute_score_for_item(i, data[i]) for i in range(len(data))]
 
-        for i, score, valid_response_length in results:
+        for i, valid_response_length, score, data_source, prompt_str, response_str, ground_truth in results:
             if isinstance(score, dict):
                 reward = score["score"]
                 for key, value in score.items():
@@ -90,6 +105,20 @@ class ExploreRewardManager:
                 reward = score
 
             reward_tensor[i, valid_response_length - 1] = reward
+
+            if data_source not in already_print_data_sources:
+                already_print_data_sources[data_source] = 0
+
+            if already_print_data_sources[data_source] < self.num_examine:
+                already_print_data_sources[data_source] += 1
+                print("[prompt]", prompt_str)
+                print("[response]", response_str)
+                print("[ground_truth]", ground_truth)
+                if isinstance(score, dict):
+                    for key, value in score.items():
+                        print(f"[{key}]", value)
+                else:
+                    print(f"[score]", score)
 
         reward_tensor_dict = {"all": reward_tensor}
 
