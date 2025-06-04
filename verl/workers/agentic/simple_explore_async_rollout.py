@@ -10,8 +10,8 @@ import torch
 import sglang as sgl
 import torch.distributed
 from omegaconf import DictConfig
-from sglang.srt.function_call_parser import FunctionCallParser
-from sglang.srt.openai_api.protocol import Tool
+# from sglang.srt.function_call_parser import FunctionCallParser
+# from sglang.srt.openai_api.protocol import Tool
 from torch.distributed import DeviceMesh
 from tensordict import TensorDict
 
