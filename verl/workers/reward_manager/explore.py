@@ -59,7 +59,7 @@ class ExploreRewardManager:
         def compute_score_for_item(i, data_item):
             history = data_item.non_tensor_batch['history']
 
-            prompt_ids = data_item.batch['prompts']
+            prompt_ids = data_item.batch['input_ids']
             prompt_length = prompt_ids.shape[-1]
             valid_prompt_length = data_item.batch['attention_mask'][:prompt_length].sum()
             valid_prompt_ids = prompt_ids[-valid_prompt_length:]
