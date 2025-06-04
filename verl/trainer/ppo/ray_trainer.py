@@ -544,7 +544,7 @@ class RayPPOTrainer(object):
             if self.config.actor_rollout_ref.rollout.task_type == "swegym": 
                 non_tensor_batch_keys = ["instance"]
             else:
-                non_tensor_batch_keys = ["raw_prompt_ids"]
+                non_tensor_batch_keys=['raw_prompt_ids', 'raw_prompt', 'ground_truth', 'index']
 
             if 'multi_modal_inputs' in test_batch.non_tensor_batch.keys():
                 test_gen_batch = test_batch.pop(
@@ -1016,12 +1016,12 @@ class RayPPOTrainer(object):
 
                         # we combine with rule-based rm
                         # we combine with rule-based rm
-                        reward_tensor_dict, reward_metrics = self.reward_fn(batch)
-                        batch.batch['token_level_scores'] = reward_tensor_dict['all']
-                        for k, v in reward_metrics.items():
+                        result = self.reward_fn(batch, return_dict=True)
+                        batch.batch['token_level_scores'] = result['reward_tensor']
+                        for k, v in result['reward_extra_info'].items():
                             metrics['train_reward/' + k] = v
                         # decomposed rewards:
-                        for k, v in reward_tensor_dict.items():
+                        for k, v in result.items():
                             batch.batch[k]=v
 
                         # compute rewards. apply_kl_penalty if available
