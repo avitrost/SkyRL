@@ -580,6 +580,13 @@ class RayPPOTrainer(object):
             output_texts = [self.tokenizer.decode(ids, skip_special_tokens=True) for ids in output_ids]
             sample_outputs.extend(output_texts)
 
+            print("*****************")
+            print('test batch')
+            print(test_batch)
+            print('^^^^^^^^^^^^^^')
+            print('gen batch')
+            print(test_output_gen_batch)
+
             # repeat to align with repeated responses in rollout
             test_batch = test_batch.repeat(repeat_times=self.config.actor_rollout_ref.rollout.n_trajectories, interleave=True)
             test_batch = test_batch.union(test_output_gen_batch)

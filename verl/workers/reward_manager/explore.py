@@ -19,13 +19,18 @@ import torch
 from collections import defaultdict
 
 def explore_compute_score(history):
+    """
+    Returns 1 if the last response in the history is not equivalent to any previous responses,
+    otherwise returns 0.
+    This function is used to count the number of distinct answers given for exploration tasks.
+    """
     answer = history[-1]
     if answer is None or answer == "":
-        return 0
+        return {"score": 0, "explore_score": 0}
     for past_response in history[:-1]:
         if is_equiv(answer, past_response):
-            return 0
-    return 1
+            return {"score": 0, "explore_score": 0}
+    return {"score": 1, "explore_score": 1}
 
 
 class ExploreRewardManager:
