@@ -287,7 +287,7 @@ class SimpleExploreAgent:
             'instance_id': self.instance_id,
             'trajectory_id': self.trajectory_id,
             'messages': messages,
-            'history': [x for x in self.history],
+            'history': self.history.copy(),  # copy the history to avoid mutation
         }
         return turn_return_val
 
