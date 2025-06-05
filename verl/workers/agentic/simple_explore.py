@@ -386,10 +386,8 @@ class SimpleExploreAgentGroup:
         # Create the final results in the same order as the batch
         matched_results = []
         # instance_list = []
-        instance_ids = []
         for batch_item in self.batch:
             instance_id = batch_item.non_tensor_batch['index']
-            instance_ids.append(instance_id)
             # instance = batch_item.non_tensor_batch['instance']
             if instance_id in instance_trajectories:
                 # Add all trajectories for this instance
@@ -439,6 +437,7 @@ class SimpleExploreAgentGroup:
         all_prompts = []
         all_responses = []
         all_trajectory_ids = []
+        all_instance_ids = []
         # TODO: iterate through each inner list
         for result_series in matched_results:
             for result in result_series:
@@ -462,6 +461,7 @@ class SimpleExploreAgentGroup:
                 # Also add non-tensor data
                 history_list.append(result.get('history', None))
                 all_trajectory_ids.append(result.get('trajectory_id', None))
+                all_instance_ids.append(result.get('instance_id', None))
 
 
         # Encode messages, get assitant mask and position ids
