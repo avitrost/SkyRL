@@ -18,6 +18,9 @@ import os
 from math_verify.metric import math_metric
 from math_verify.parser import LatexExtractionConfig, ExprExtractionConfig
 
+import logging
+logging.getLogger("latex2sympy2_extended.math_normalization").setLevel(logging.ERROR)
+
 
 def is_equiv(output_1: str, output_2: str) -> bool:
     """
@@ -30,10 +33,8 @@ def is_equiv(output_1: str, output_2: str) -> bool:
     ret_score = 0.
 
     try:
-        # Bypass warnings printed
-        with open(os.devnull, 'w') as fnull, contextlib.redirect_stdout(fnull), contextlib.redirect_stderr(fnull):
-            ret_score_1, _ = verify_func([output_1], [output_2])
-            ret_score_2, _ = verify_func([output_2], [output_1])
+        ret_score_1, _ = verify_func([output_1], [output_2])
+        ret_score_2, _ = verify_func([output_2], [output_1])
         ret_score = ret_score_1 or ret_score_2
     except Exception as e:
         pass
