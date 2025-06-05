@@ -287,7 +287,7 @@ class SimpleExploreAgent:
             'instance_id': self.instance_id,
             'trajectory_id': self.trajectory_id,
             'messages': messages,
-            'history': self.history,
+            'history': [x for x in self.history],
         }
         return turn_return_val
 
