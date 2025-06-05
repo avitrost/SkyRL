@@ -510,7 +510,7 @@ class SimpleExploreAgentGroup:
         non_tensor_dict = {
             'history': history_list,
             'trajectory_ids': all_trajectory_ids,
-            'instance_ids': instance_ids,
+            'instance_ids': all_instance_ids,
         }
         
         # Create and return DataProto
