@@ -386,8 +386,10 @@ class SimpleExploreAgentGroup:
         # Create the final results in the same order as the batch
         matched_results = []
         # instance_list = []
+        instance_ids = []
         for batch_item in self.batch:
             instance_id = batch_item.non_tensor_batch['index']
+            instance_ids.append(instance_id)
             # instance = batch_item.non_tensor_batch['instance']
             if instance_id in instance_trajectories:
                 # Add all trajectories for this instance
@@ -508,6 +510,7 @@ class SimpleExploreAgentGroup:
         non_tensor_dict = {
             'history': history_list,
             'trajectory_ids': all_trajectory_ids,
+            'instance_ids': instance_ids,
         }
         
         # Create and return DataProto
