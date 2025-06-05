@@ -38,25 +38,53 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    data_source = 'open-r1/DAPO-Math-17k-Processed'
+    train_data_source = 'open-r1/DAPO-Math-17k-Processed'
+    test_data_source = 'opencompass/AIME2025'
 
-    dataset = datasets.load_dataset(data_source, 'en')['train']
-
-    train_dataset, test_dataset = dataset.train_test_split(test_size=0.00175, seed=42).values()
+    train_dataset = datasets.load_dataset(train_data_source, 'en')['train']
+    test_dataset_1 = datasets.load_dataset(test_data_source, 'AIME2025-I')['test']
+    test_dataset_2 = datasets.load_dataset(test_data_source, 'AIME2025-II')['test']
+    test_dataset = datasets.concatenate_datasets([test_dataset_1, test_dataset_2])
 
     # instruction_following = "Let's think step by step and output the final answer after \"####\"."
 
     # add a row to each data item that represents a unique id
     def make_map_fn(split):
 
-        def process_fn(example, idx):
+        def train_process_fn(example, idx):
             question_raw = example.pop('prompt')
 
             question = question_raw
 
             solution = example.pop('solution')
             data = {
-                "data_source": data_source,
+                "data_source": train_data_source,
+                "prompt": [{
+                    "role": "user",
+                    "content": question,
+                }],
+                "ability": "math",
+                "reward_model": {
+                    "style": "rule",
+                    "ground_truth": solution
+                },
+                "extra_info": {
+                    'split': split,
+                    'index': idx,
+                    'answer': solution,
+                    "question": question_raw,
+                }
+            }
+            return data
+        
+        def test_process_fn(example, idx):
+            question_raw = example.pop('question')
+
+            question = question_raw
+
+            solution = example.pop('answer')
+            data = {
+                "data_source": test_data_source,
                 "prompt": [{
                     "role": "user",
                     "content": question,
@@ -75,7 +103,7 @@ if __name__ == '__main__':
             }
             return data
 
-        return process_fn
+        return train_process_fn if split == 'train' else test_process_fn
 
     train_dataset = train_dataset.map(function=make_map_fn('train'), with_indices=True)
     test_dataset = test_dataset.map(function=make_map_fn('test'), with_indices=True)
