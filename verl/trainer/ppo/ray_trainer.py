@@ -494,11 +494,6 @@ class RayPPOTrainer(object):
         """Log a table of validation samples to the configured logger (wandb or swanlab)"""
 
         generations_to_log = self.config.trainer.log_val_generations
-        print(f"generations_to_log: {generations_to_log}")
-        print(f"inputs: {inputs}")
-        print(f"outputs: {outputs}")
-        print(f"scores: {scores}")
-        assert False
 
         if generations_to_log == 0:
             return
@@ -517,7 +512,14 @@ class RayPPOTrainer(object):
         samples = samples[:generations_to_log]
 
         # Log to each configured logger
+        print("LOGGING VALIDATION GENERATIONS")
+        print(f"samples: {samples}")
+        print(f"self.config.trainer.logger: {self.config.trainer.logger}")
+        print(f"self.global_steps: {self.global_steps}")
         self.validation_generations_logger.log(self.config.trainer.logger, samples, self.global_steps)
+        print("LOGGING VALIDATION GENERATIONS DONE")
+        assert False
+
 
     def _validate(self):
         reward_tensor_lst = []
