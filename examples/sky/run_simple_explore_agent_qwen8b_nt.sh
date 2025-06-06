@@ -86,6 +86,7 @@ PYTHONUNBUFFERED=1 uv run --isolated --directory . --frozen --env-file .env -m v
     trainer.nnodes=$NNODES \
     trainer.save_freq=$SAVE_FREQ \
     trainer.val_before_train=True \
+    trainer.log_val_generations=3 \
     data.dataloader_num_workers=0 \
     actor_rollout_ref.exchange_size=500000000 \
     trainer.test_freq=1 \

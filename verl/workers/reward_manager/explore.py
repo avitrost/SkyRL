@@ -92,17 +92,6 @@ class ExploreRewardManager:
             prompt_str = self.tokenizer.decode(valid_prompt_ids, skip_special_tokens=True)
             response_str = self.tokenizer.decode(valid_response_ids, skip_special_tokens=True)
 
-            print('[debug] decoding prompt and response')
-            print(valid_prompt_ids)
-            print('#################')
-            print(valid_response_ids)
-            print('#################')
-            print("prompt str")
-            print(prompt_str)
-            print('#################')
-            print(response_str)
-            print('#################')
-
             ground_truth = data_item.non_tensor_batch['reward_model']['ground_truth']
 
             # print(f"naive reward manager {self.tokenizer=}")
