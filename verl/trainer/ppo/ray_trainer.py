@@ -586,12 +586,14 @@ class RayPPOTrainer(object):
             test_batch = test_batch.repeat(repeat_times=self.config.actor_rollout_ref.rollout.max_iterations, interleave=True)
             test_batch = test_batch.union(test_output_gen_batch)
 
+            # evaluate using reward_function
             result = self.val_reward_fn(test_batch, return_dict=True)
             reward_tensor = result["reward_tensor"]
             scores = reward_tensor.sum(-1).cpu().tolist()
             sample_scores.extend(scores)
+
+            reward_extra_infos_dict["reward"].extend(scores)
             if "reward_extra_info" in result:
-                reward_extra_infos_dict["final_reward"].extend(scores)
                 for key, lst in result["reward_extra_info"].items():
                     reward_extra_infos_dict[key].extend(lst)
 
@@ -605,16 +607,14 @@ class RayPPOTrainer(object):
         data_sources = np.concatenate(data_source_lst, axis=0)
 
         data_src2var2metric2val = process_validation_metrics(data_sources, sample_inputs, reward_extra_infos_dict)
-
+        
         metric_dict = {}
         for data_source, var2metric2val in data_src2var2metric2val.items():
-            core_var = "acc" if "acc" in var2metric2val else "final_reward"
+            core_var = "acc" if "acc" in var2metric2val else "reward"
             for var_name, metric2val in var2metric2val.items():
                 n_max = max([int(name.split("@")[-1].split("/")[0]) for name in metric2val.keys()])
                 for metric_name, metric_val in metric2val.items():
-                    if var_name == core_var and any(
-                            metric_name.startswith(pfx)
-                            for pfx in ["mean", "std", "maj", "best"]) and f"@{n_max}/" in metric_name:
+                    if (var_name == core_var) and any(metric_name.startswith(pfx) for pfx in ["mean", "maj", "best"]) and (f"@{n_max}" in metric_name):
                         metric_sec = "val-core"
                     else:
                         metric_sec = "val-aux"

@@ -202,29 +202,51 @@ def calc_maj_val(data: list[dict[str, Any]], vote_key: str, val_key: str) -> flo
     return maj_val
 
 
-def process_validation_metrics(data_sources: list[str], sample_inputs: list[str],
-                               infos_dict: dict[str, list[Any]]) -> dict[str, dict[str, dict[str, float]]]:
-    """Process validation metrics into a structured format.
+def process_validation_metrics(data_sources: list[str], sample_inputs: list[str], infos_dict: dict[str, list[Any]], seed: int = 42) -> dict[str, dict[str, dict[str, float]]]:
+    """
+    Process validation metrics into a structured format with statistical analysis.
+    
+    This function organizes validation metrics by data source and prompt, then computes
+    various statistical measures including means, standard deviations, best/worst values,
+    and majority voting results. It also performs bootstrap sampling to estimate statistics
+    for different sample sizes.
     
     Args:
-        data_sources: Array of data source identifiers for each sample
-        sample_inputs: List of input prompts
-        infos_dict: variable name -> list of values for each sample
-        
+        data_sources: List of data source identifiers for each sample.
+        sample_inputs: List of input prompts corresponding to each sample.
+        infos_dict: Dictionary mapping variable names to lists of values for each sample.
+        seed: Random seed for bootstrap sampling. Defaults to 42.
+
     Returns:
-        dict[str, dict[str, dict[str, float]]]: data source -> variable name -> metric value
+        A nested dictionary with the structure:
+        {
+            data_source: {
+                variable_name: {
+                    metric_name: value
+                }
+            }
+        }
+        
+        Where metric_name includes:
+        - "mean@N": Mean value across N samples
+        - "std@N": Standard deviation across N samples
+        - "best@N/mean": Mean of the best values in bootstrap samples of size N
+        - "best@N/std": Standard deviation of the best values in bootstrap samples
+        - "worst@N/mean": Mean of the worst values in bootstrap samples
+        - "worst@N/std": Standard deviation of the worst values in bootstrap samples
+        - "maj@N/mean": Mean of majority voting results in bootstrap samples (if "pred" exists)
+        - "maj@N/std": Standard deviation of majority voting results (if "pred" exists)
+        
+    Example:
+        >>> data_sources = ["source1", "source1", "source2"]
+        >>> sample_inputs = ["prompt1", "prompt1", "prompt2"]
+        >>> infos_dict = {"score": [0.8, 0.9, 0.7], "pred": ["A", "A", "B"]}
+        >>> result = process_validation_metrics(data_sources, sample_inputs, infos_dict)
+        >>> # result will contain statistics for each data source and variable
     """
     # Group metrics by data source, prompt and variable
     data_src2prompt2var2vals = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
-    print("********************** sample_inputs:")
-    print(len(sample_inputs))
-    print(sample_inputs)
-    print("&&&&&&&&&&&&&&&&&&&&&& data_sources:")
-    print(len(data_sources))
-    print(data_sources)
     for sample_idx, data_source in enumerate(data_sources):
-        print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ sample_idx:")
-        print(sample_idx)
         prompt = sample_inputs[sample_idx]
         var2vals = data_src2prompt2var2vals[data_source][prompt]
         for var_name, var_vals in infos_dict.items():
@@ -233,54 +255,38 @@ def process_validation_metrics(data_sources: list[str], sample_inputs: list[str]
     # Calculate metrics for each group
     data_src2prompt2var2metric = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
     for data_source, prompt2var2vals in data_src2prompt2var2vals.items():
-        print(f"Processing data source: {data_source}")
-        print(f"Number of prompts: {len(prompt2var2vals)}")
-        print("prompt2var2vals:")
-        print(prompt2var2vals)
-        print("**********************")
         for prompt, var2vals in prompt2var2vals.items():
-            print(f"Processing prompt: {prompt}")
-            print(f"Number of variables: {len(var2vals)}")
-            print("var2vals:")
-            print(var2vals)
-            n_resps = len(var2vals["final_reward"])
-            preds = var2vals["pred"]
-            print(f"Number of responses: {n_resps}")
-            print("preds:")
-            print(preds)
-            print("**********************")
             for var_name, var_vals in var2vals.items():
-                print(f"Processing variable: {var_name}")
-                print(f"Number of values: {len(var_vals)}")
-                print("var_vals:")
-                print(var_vals)
-                print("**********************")
-                if var_name in ["pred", "final_reward"]:
+                if isinstance(var_vals[0], str):
                     continue
+
                 metric = {}
-
+                n_resps = len(var_vals)
                 metric[f"mean@{n_resps}"] = np.mean(var_vals)
-                metric[f"std@{n_resps}"] = np.std(var_vals)
 
-                ns = []
-                n = 2
-                while n < n_resps:
-                    ns.append(n)
-                    n *= 2
-                ns.append(n_resps)
+                if n_resps > 1:
+                    metric[f"std@{n_resps}"] = np.std(var_vals)
 
-                data = [{"val": val, "pred": pred} for val, pred in zip(var_vals, preds)]
-                for n in ns:
-                    (bon_mean, bon_std), (won_mean, won_std), (maj_n_mean, maj_n_std) = bootstrap_metric(
-                        data,
-                        subset_size=n,
-                        reduce_fns=[
-                            lambda arr: np.max([d["val"] for d in arr]), lambda arr: np.min([d["val"] for d in arr]),
-                            partial(calc_maj_val, vote_key="pred", val_key="val")
-                        ])
-                    metric[f"best@{n}/mean"], metric[f"best@{n}/std"] = bon_mean, bon_std
-                    metric[f"worst@{n}/mean"], metric[f"worst@{n}/std"] = won_mean, won_std
-                    metric[f"maj@{n}/mean"], metric[f"maj@{n}/std"] = maj_n_mean, maj_n_std
+                    ns = []
+                    n = 2
+                    while n < n_resps:
+                        ns.append(n)
+                        n *= 2
+                    ns.append(n_resps)
+
+                    for n in ns:
+                        [(bon_mean, bon_std), (won_mean, won_std)] = bootstrap_metric(data=var_vals, subset_size=n, reduce_fns=[np.max, np.min], seed=seed)
+                        metric[f"best@{n}/mean"], metric[f"best@{n}/std"] = bon_mean, bon_std
+                        metric[f"worst@{n}/mean"], metric[f"worst@{n}/std"] = won_mean, won_std
+                        if var2vals.get("pred", None) is not None:
+                            vote_data = [{"val": val, "pred": pred} for val, pred in zip(var_vals, var2vals["pred"])]
+                            [(maj_n_mean, maj_n_std)] = bootstrap_metric(
+                                data=vote_data,
+                                subset_size=n,
+                                reduce_fns=[partial(calc_maj_val, vote_key="pred", val_key="val")],
+                                seed=seed,
+                            )
+                            metric[f"maj@{n}/mean"], metric[f"maj@{n}/std"] = maj_n_mean, maj_n_std
 
                 data_src2prompt2var2metric[data_source][prompt][var_name] = metric
 
