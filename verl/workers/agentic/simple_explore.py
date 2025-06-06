@@ -511,6 +511,7 @@ class SimpleExploreAgentGroup:
         print("response_str")
         print(response_str)
         print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+        assert False
         attention_mask = torch.cat([prompt_attention_mask, response_attention_mask], dim=1)
         position_ids = compute_position_id_with_mask(attention_mask)
 
