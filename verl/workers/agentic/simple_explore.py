@@ -491,33 +491,6 @@ class SimpleExploreAgentGroup:
             
         
         input_ids = torch.cat([prompt_input_ids, response_ids], dim=1)
-        print("**********************************************************")
-        print('matched_results')
-        print(matched_results)
-        print("all_prompts")
-        print(all_prompts)
-        print("all_responses")
-        print(all_responses)
-        print("input_ids")
-        print(input_ids)
-        print("response_ids")
-        print(response_ids)
-        print("prompt_input_ids")
-        print(prompt_input_ids)
-        prompt_ids = prompt_input_ids[0]
-        prompt_length = prompt_ids.shape[-1]
-        valid_prompt_length = prompt_attention_mask[0][:prompt_length].sum()
-        valid_prompt_ids = prompt_ids[-valid_prompt_length:]
-        prompt_str = self.tokenizer.decode(valid_prompt_ids, skip_special_tokens=True)
-        print("prompt_str")
-        print(prompt_str)
-        valid_response_length = response_attention_mask[0][prompt_length:].sum()
-        valid_response_ids = response_ids[0][:valid_response_length]
-        response_str = self.tokenizer.decode(valid_response_ids, skip_special_tokens=True)
-        print("response_str")
-        print(response_str)
-        print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
-        assert False
         attention_mask = torch.cat([prompt_attention_mask, response_attention_mask], dim=1)
         position_ids = compute_position_id_with_mask(attention_mask)
 
