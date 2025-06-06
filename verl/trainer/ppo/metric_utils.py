@@ -233,10 +233,28 @@ def process_validation_metrics(data_sources: list[str], sample_inputs: list[str]
     # Calculate metrics for each group
     data_src2prompt2var2metric = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
     for data_source, prompt2var2vals in data_src2prompt2var2vals.items():
+        print(f"Processing data source: {data_source}")
+        print(f"Number of prompts: {len(prompt2var2vals)}")
+        print("prompt2var2vals:")
+        print(prompt2var2vals)
+        print("**********************")
         for prompt, var2vals in prompt2var2vals.items():
+            print(f"Processing prompt: {prompt}")
+            print(f"Number of variables: {len(var2vals)}")
+            print("var2vals:")
+            print(var2vals)
             n_resps = len(var2vals["final_reward"])
             preds = var2vals["pred"]
+            print(f"Number of responses: {n_resps}")
+            print("preds:")
+            print(preds)
+            print("**********************")
             for var_name, var_vals in var2vals.items():
+                print(f"Processing variable: {var_name}")
+                print(f"Number of values: {len(var_vals)}")
+                print("var_vals:")
+                print(var_vals)
+                print("**********************")
                 if var_name in ["pred", "final_reward"]:
                     continue
                 metric = {}
