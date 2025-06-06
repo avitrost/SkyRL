@@ -74,7 +74,13 @@ class ExploreRewardManager:
             valid_response_ids = response_ids[:valid_response_length]
 
             # decode
+            print('[debug] decoding prompt and response')
+            print(valid_prompt_ids)
+            print('#################')
             prompt_str = self.tokenizer.decode(valid_prompt_ids, skip_special_tokens=True)
+            print("prompt str")
+            print(prompt_str)
+            print("((((((((((((((((((((()))))))))))))))))))))")
             response_str = self.tokenizer.decode(valid_response_ids, skip_special_tokens=True)
 
             ground_truth = data_item.non_tensor_batch['reward_model']['ground_truth']
