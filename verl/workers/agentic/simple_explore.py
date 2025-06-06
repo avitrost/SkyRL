@@ -504,10 +504,16 @@ class SimpleExploreAgentGroup:
         print(response_ids)
         print("prompt_input_ids")
         print(prompt_input_ids)
-        prompt_str = self.tokenizer.decode(input_ids[0], skip_special_tokens=True)
+        prompt_ids = prompt_input_ids[0]
+        prompt_length = prompt_ids.shape[-1]
+        valid_prompt_length = prompt_attention_mask[0][:prompt_length].sum()
+        valid_prompt_ids = prompt_ids[-valid_prompt_length:]
+        prompt_str = self.tokenizer.decode(valid_prompt_ids, skip_special_tokens=True)
         print("prompt_str")
         print(prompt_str)
-        response_str = self.tokenizer.decode(response_ids[0], skip_special_tokens=True)
+        valid_response_length = response_attention_mask[0][prompt_length:].sum()
+        valid_response_ids = response_ids[0][:valid_response_length]
+        response_str = self.tokenizer.decode(valid_response_ids, skip_special_tokens=True)
         print("response_str")
         print(response_str)
         print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
