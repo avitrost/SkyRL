@@ -40,6 +40,7 @@ SIMPLE_EXPLORE_TEMPLATE = """
     Respond in the following format, using careful step-by-step reasoning.
     The <history> tag contains the history of previous attempted answers, which you can use to inform your reasoning.
     Inside the <answer> tag, put your final answer as LaTeX inside `$...$` formatting.
+    E.g. <answer>$17$</answer>.
     It is critical that the answer provided in the <answer> tag is DIFFERENT from the previous attempts, even if it may be wrong. AN answer must be provided regardless.
 
     <reasoning>
