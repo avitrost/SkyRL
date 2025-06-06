@@ -89,4 +89,4 @@ PYTHONUNBUFFERED=1 uv run --isolated --directory . --frozen --env-file .env -m v
     data.dataloader_num_workers=0 \
     actor_rollout_ref.exchange_size=500000000 \
     trainer.test_freq=1 \
-    trainer.total_epochs=100 $@
+    trainer.total_epochs=1000 $@
