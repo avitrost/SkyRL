@@ -43,7 +43,7 @@ if __name__ == '__main__':
 
     train_dataset = datasets.load_dataset(train_data_source, 'en')['train']
     test_dataset_1 = datasets.load_dataset(test_data_source, 'AIME2025-I')['test']
-    test_dataset_2 = datasets.load_dataset(test_data_source, 'AIME2025-II')['test']
+    test_dataset_2 = datasets.load_dataset(test_data_source, 'AIME2025-II')['test'].select(range(13)) # To end up with 28 samples for multi-gpu divisibility
     test_dataset = datasets.concatenate_datasets([test_dataset_1, test_dataset_2])
 
     # instruction_following = "Let's think step by step and output the final answer after \"####\"."
