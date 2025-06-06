@@ -491,6 +491,9 @@ class SimpleExploreAgentGroup:
             
         
         input_ids = torch.cat([prompt_input_ids, response_ids], dim=1)
+        print("input_ids")
+        print(input_ids)
+        print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
         attention_mask = torch.cat([prompt_attention_mask, response_attention_mask], dim=1)
         position_ids = compute_position_id_with_mask(attention_mask)
 
