@@ -216,6 +216,10 @@ def process_validation_metrics(data_sources: list[str], sample_inputs: list[str]
     """
     # Group metrics by data source, prompt and variable
     data_src2prompt2var2vals = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
+    print("********************** sample_inputs:")
+    print(sample_inputs)
+    print("&&&&&&&&&&&&&&&&&&&&&& data_sources:")
+    print(data_sources)
     for sample_idx, data_source in enumerate(data_sources):
         prompt = sample_inputs[sample_idx]
         var2vals = data_src2prompt2var2vals[data_source][prompt]
