@@ -580,7 +580,7 @@ class RayPPOTrainer(object):
             output_texts = [self.tokenizer.decode(ids, skip_special_tokens=True) for ids in output_ids]
             sample_outputs.extend(output_texts)
 
-            data_source_lst.append(test_batch.non_tensor_batch.get('data_source', ['unknown'] * reward_tensor.shape[0]))
+            data_source_lst.append(test_batch.non_tensor_batch.get('data_source', ['unknown'] * sample_inputs.shape[0]))
 
             # repeat to align with repeated responses in rollout
             test_batch = test_batch.repeat(repeat_times=self.config.actor_rollout_ref.rollout.max_iterations, interleave=True)
