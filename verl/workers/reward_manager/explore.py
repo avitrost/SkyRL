@@ -32,7 +32,7 @@ def explore_compute_score(history):
             return {"score": 0, "explore_score": 0}
     return {"score": 1, "explore_score": 1}
 
-def pass_at_k_compute_score(history, is_last_turn, ground_truth):
+def pass_at_k_compute_score(history, is_last_turn, ground_truth, explore_only):
     """
     Computes the pass@k score based on the history and ground truth.
     Returns 1 if the last response in the history is equivalent to the ground truth,
@@ -43,7 +43,7 @@ def pass_at_k_compute_score(history, is_last_turn, ground_truth):
     for past_response in history:
         if is_correct(past_response, ground_truth):
             k = len(history)
-            return {"score": k, "pass@k_score": k}
+            return {"score": k if not explore_only else 0, "pass@k_score": k}  # we still log the metric even if explore_only is True
     return {"score": 0, "pass@k_score": 0}
 
 def compute_score(history, is_last_turn=False, ground_truth=None, explore_only=False):
@@ -51,18 +51,15 @@ def compute_score(history, is_last_turn=False, ground_truth=None, explore_only=F
     Computes the score for the given history.
     If explore_only is True, it only computes the exploration score.
     """
-    if explore_only:
-        return explore_compute_score(history)
-    else:
-        result1 = explore_compute_score(history)
-        result2 = pass_at_k_compute_score(history, is_last_turn, ground_truth)
-        # Combine the scores from both functions
-        combined_score = {
-            "score": result1["score"] + result2["score"],
-            "explore_score": result1["explore_score"],
-            "pass@k_score": result2["pass@k_score"]
-        }
-        return combined_score
+    result1 = explore_compute_score(history)
+    result2 = pass_at_k_compute_score(history, is_last_turn, ground_truth, explore_only)
+    # Combine the scores from both functions
+    combined_score = {
+        "score": result1["score"] + result2["score"],
+        "explore_score": result1["explore_score"],
+        "pass@k_score": result2["pass@k_score"]
+    }
+    return combined_score
 
 
 class ExploreRewardManager:
