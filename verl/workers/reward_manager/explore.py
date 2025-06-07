@@ -46,7 +46,7 @@ def pass_at_k_compute_score(history, is_last_turn, ground_truth, explore_only):
             return {"score": k if not explore_only else 0, "pass@k_score": k}  # we still log the metric even if explore_only is True
     return {"score": 0, "pass@k_score": 0}
 
-def compute_score(history, is_last_turn=False, ground_truth=None, explore_only=False):
+def total_compute_score(history, is_last_turn=False, ground_truth=None, explore_only=False):
     """
     Computes the score for the given history.
     If explore_only is True, it only computes the exploration score.
@@ -75,7 +75,7 @@ class ExploreRewardManager:
                  config=None) -> None:
         self.tokenizer = tokenizer
         self.num_examine = num_examine  # the number of batches of decoded responses to print to the console
-        self.compute_score = explore_compute_score
+        self.compute_score = total_compute_score
         self.reward_fn_key = reward_fn_key
         self.use_parallel = use_parallel
         self.explore_only = config.reward_model.get("explore_only", False)
