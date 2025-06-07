@@ -524,6 +524,7 @@ class RayPPOTrainer(object):
         sample_inputs = []
         sample_outputs = []
         sample_scores = []
+        processed_sample_inputs = []
 
         for test_data in self.val_dataloader:
             test_batch = DataProto.from_single_dict(test_data)
@@ -593,6 +594,9 @@ class RayPPOTrainer(object):
             scores = reward_tensor.sum(-1).cpu().tolist()
             sample_scores.extend(scores)
 
+            processed_input_text = test_output_gen_batch.non_tensor_batch['user_content']
+            processed_sample_inputs.extend(processed_input_text)
+
             reward_extra_infos_dict["reward"].extend(scores)
             if "reward_extra_info" in result:
                 for key, lst in result["reward_extra_info"].items():
@@ -600,7 +604,7 @@ class RayPPOTrainer(object):
 
             # data_source_lst.append(test_batch.non_tensor_batch.get('data_source', ['unknown'] * reward_tensor.shape[0]))
 
-        self._maybe_log_val_generations(inputs=sample_inputs, outputs=sample_outputs, scores=sample_scores)
+        self._maybe_log_val_generations(inputs=processed_sample_inputs, outputs=sample_outputs, scores=sample_scores)
 
         for lst in reward_extra_infos_dict.values():
             assert len(lst) == 0 or len(lst) == len(sample_scores)

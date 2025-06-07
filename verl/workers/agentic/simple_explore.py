@@ -524,6 +524,8 @@ class SimpleExploreAgentGroup:
         attention_mask = torch.cat([prompt_attention_mask, response_attention_mask], dim=1)
         position_ids = compute_position_id_with_mask(attention_mask)
 
+        user_content = [prompt['content'] for prompt in all_prompts]
+
         # Create tensor dictionary
         logger.info(f"input_ids shape: {input_ids.shape}, response_ids shape: {response_ids.shape}, max_starting_message_length: {self.max_starting_message_length}, max_response_length: {self.total_len}")
         assert input_ids.shape[1] == attention_mask.shape[1] == position_ids.shape[1], f"input_ids shape {input_ids.shape}, attention_mask shape {attention_mask.shape}, position_ids shape {position_ids.shape} do not match"
@@ -541,6 +543,7 @@ class SimpleExploreAgentGroup:
             'history': history_list,
             'trajectory_ids': all_trajectory_ids,
             'instance_ids': all_instance_ids,
+            'user_content': user_content,
         }
         
         # Create and return DataProto
