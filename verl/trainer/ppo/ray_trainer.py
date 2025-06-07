@@ -512,13 +512,7 @@ class RayPPOTrainer(object):
         samples = samples[:generations_to_log]
 
         # Log to each configured logger
-        print("LOGGING VALIDATION GENERATIONS")
-        print(f"samples: {samples}")
-        print(f"self.config.trainer.logger: {self.config.trainer.logger}")
-        print(f"self.global_steps: {self.global_steps}")
         self.validation_generations_logger.log(self.config.trainer.logger, samples, self.global_steps)
-        print("LOGGING VALIDATION GENERATIONS DONE")
-        assert False
 
 
     def _validate(self):

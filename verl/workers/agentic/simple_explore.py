@@ -227,18 +227,40 @@ class SimpleExploreAgent:
 
         self.history = []  # Initialize history as an empty list
 
-    def _prepare_input(self) -> str:
-        """Prepare input for the model, returning text."""
+    def _prepare_input(self) -> tuple[str, str]:
+        """Prepare input for the model, returning both user content and chat-templated input text.
+        
+        Returns:
+            tuple: (user_content, templated_input_text)
+        """
         # Format the template with current state values
         formatted_history = "\n".join(
             [f"Turn {i}: {answer}" for i, answer in enumerate(self.history)]
         )
-        input_text = SIMPLE_EXPLORE_TEMPLATE.format(
+        user_content = SIMPLE_EXPLORE_TEMPLATE.format(
             prompt=self.prompt,
             history=formatted_history
         )
+        
+        # Create messages in chat format
+        messages = [
+            {
+                'role': 'user',
+                'content': user_content,
+            }
+        ]
+        
+        # Apply chat template to get properly formatted prompt for LLM
+        # Note: We use tokenize=False here because we need text input for the LLM.
+        # The _convert_results_to_dataproto method will apply chat template with 
+        # tokenization and padding for training data preparation.
+        templated_input_text = self.tokenizer.apply_chat_template(
+            messages, 
+            add_generation_prompt=True,
+            tokenize=False
+        )
 
-        return input_text
+        return user_content, templated_input_text
     
     def _parse_response(self, response_str: str) -> Optional[str]:  # TODO: don't hardcode
         # Parse answer
@@ -267,21 +289,26 @@ class SimpleExploreAgent:
     async def explore(self, turn: int) -> Dict[str, Any]:
         # print(f"Exploring instance {self.instance_id}, trajectory {self.trajectory_id}, iteration {turn}/{self.max_iterations}")
         # Generate the next step
-        input_text = self._prepare_input()  # from history
-        # print(f"Input text for generation {turn}:", input_text)
-        response_str = await self.generate(prompt=input_text, sampling_params=self.sampling_params)
-        # response_str = call_async_from_sync(self.generate, prompt=input_text, sampling_params=self.sampling_params)
+        
+        # Get both user content and chat-templated input
+        user_content, templated_input_text = self._prepare_input()
+        
+        # print(f"Input text for generation {turn}:", templated_input_text)
+        response_str = await self.generate(prompt=templated_input_text, sampling_params=self.sampling_params)
+        # response_str = call_async_from_sync(self.generate, prompt=templated_input_text, sampling_params=self.sampling_params)
         # print("GOT A RESPONSE STRING")
         extracted_answer = self._parse_response(response_str)
         self.history.append(extracted_answer)  # update history
+        
+        # Construct messages with the original user content and LLM response
         messages = [
             {
                 'role': 'user',
-                'content': input_text,
+                'content': user_content,  # Store original user content without chat template
             },
             {
                 'role': 'assistant',
-                'content': response_str,
+                'content': response_str,  # LLM response (already includes chat template formatting)
             }
         ]
         turn_return_val = {
@@ -465,7 +492,9 @@ class SimpleExploreAgentGroup:
                 all_instance_ids.append(result.get('instance_id', None))
 
 
-        # Encode messages, get assitant mask and position ids
+        # Encode messages, get assistant mask and position ids
+        # Note: Here we tokenize and pad for training data preparation.
+        # This is different from _prepare_input() which only generates text for LLM.
         prompt_encodings = self.tokenizer.apply_chat_template(
             all_prompts, 
             # return_tensors="pt",
@@ -527,7 +556,7 @@ class SimpleExploreAgentGroup:
         for data_item in self.batch:
             instance_id = data_item.non_tensor_batch['index']
             self.agents[instance_id] = {}
-            prompt = data_item.non_tensor_batch['raw_prompt'][0]['content']
+            prompt = data_item.non_tensor_batch['raw_prompt'][0]['content'] # Raw prompt does not include the chat template
             for n in range(self.num_trajectories):
                 self.agents[instance_id][n] = SimpleExploreAgent(
                     instance_id=instance_id,

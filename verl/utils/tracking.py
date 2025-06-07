@@ -187,12 +187,33 @@ def _flatten_dict(raw: Dict[str, Any], *, sep: str) -> Dict[str, Any]:
 class ValidationGenerationsLogger:
 
     def log(self, loggers, samples, step):
+        print(f"[DEBUG] ValidationGenerationsLogger.log called with loggers={loggers}, step={step}, num_samples={len(samples)}")
+        
         if 'wandb' in loggers:
-            self.log_generations_to_wandb(samples, step)
+            print(f"[DEBUG] Attempting to log to wandb...")
+            try:
+                self.log_generations_to_wandb(samples, step)
+                print(f"[DEBUG] Successfully logged to wandb")
+            except Exception as e:
+                print(f"[DEBUG] Failed to log to wandb: {e}")
+                
         if 'swanlab' in loggers:
-            self.log_generations_to_swanlab(samples, step)
+            print(f"[DEBUG] Attempting to log to swanlab...")
+            try:
+                self.log_generations_to_swanlab(samples, step)
+                print(f"[DEBUG] Successfully logged to swanlab")
+            except Exception as e:
+                print(f"[DEBUG] Failed to log to swanlab: {e}")
+                
         if 'mlflow' in loggers:
-            self.log_generations_to_mlflow(samples, step)
+            print(f"[DEBUG] Attempting to log to mlflow...")
+            try:
+                self.log_generations_to_mlflow(samples, step)
+                print(f"[DEBUG] Successfully logged to mlflow")
+            except Exception as e:
+                print(f"[DEBUG] Failed to log to mlflow: {e}")
+                
+        print(f"[DEBUG] ValidationGenerationsLogger.log completed")
 
     def log_generations_to_wandb(self, samples, step):
         """Log samples to wandb as a table"""
