@@ -14,7 +14,7 @@
 
 from verl import DataProto
 from verl.utils.reward_score import _default_compute_score
-from verl.utils.reward_score.explore import is_equiv
+from verl.utils.reward_score.explore import is_equiv, is_correct
 import torch
 from collections import defaultdict
 
@@ -31,6 +31,38 @@ def explore_compute_score(history):
         if is_equiv(answer, past_response):
             return {"score": 0, "explore_score": 0}
     return {"score": 1, "explore_score": 1}
+
+def pass_at_k_compute_score(history, is_last_turn, ground_truth):
+    """
+    Computes the pass@k score based on the history and ground truth.
+    Returns 1 if the last response in the history is equivalent to the ground truth,
+    otherwise returns 0.
+    """
+    if not is_last_turn:
+        return {"score": 0, "pass@k_score": 0}
+    for past_response in history:
+        if is_correct(past_response, ground_truth):
+            k = len(history)
+            return {"score": k, "pass@k_score": k}
+    return {"score": 0, "pass@k_score": 0}
+
+def compute_score(history, is_last_turn=False, ground_truth=None, explore_only=False):
+    """
+    Computes the score for the given history.
+    If explore_only is True, it only computes the exploration score.
+    """
+    if explore_only:
+        return explore_compute_score(history)
+    else:
+        result1 = explore_compute_score(history)
+        result2 = pass_at_k_compute_score(history, is_last_turn, ground_truth)
+        # Combine the scores from both functions
+        combined_score = {
+            "score": result1["score"] + result2["score"],
+            "explore_score": result1["explore_score"],
+            "pass@k_score": result2["pass@k_score"]
+        }
+        return combined_score
 
 
 class ExploreRewardManager:
@@ -49,6 +81,7 @@ class ExploreRewardManager:
         self.compute_score = explore_compute_score
         self.reward_fn_key = reward_fn_key
         self.use_parallel = use_parallel
+        self.explore_only = config.reward_model.get("explore_only", False)
 
     def __call__(self, data: DataProto, return_dict=False):
         """We will expand this function gradually based on the available datasets"""
@@ -63,6 +96,7 @@ class ExploreRewardManager:
 
         def compute_score_for_item(i, data_item):
             history = data_item.non_tensor_batch['history']
+            is_last_turn = data_item.non_tensor_batch['is_last_turn']
 
             # The input_ids contains both prompt and response concatenated
             # We need to separate them using the response tensor
@@ -105,7 +139,7 @@ class ExploreRewardManager:
             # extra_info = data_item.non_tensor_batch.get('extra_info', None)
 
             # print(f"naive reward manager {self.tokenizer=}")
-            score = self.compute_score(history=history)
+            score = self.compute_score(history=history, is_last_turn=is_last_turn, ground_truth=ground_truth, explore_only=self.explore_only)
 
             return i, valid_response_length, score, data_source, prompt_str, response_str, ground_truth
 

@@ -316,6 +316,7 @@ class SimpleExploreAgent:
             'trajectory_id': self.trajectory_id,
             'messages': messages,
             'history': self.history.copy(),  # copy the history to avoid mutation
+            'is_last_turn': turn == self.max_iterations - 1,
         }
         return turn_return_val
 
@@ -466,6 +467,7 @@ class SimpleExploreAgentGroup:
         all_responses = []
         all_trajectory_ids = []
         all_instance_ids = []
+        all_is_last_turns = []
         # TODO: iterate through each inner list
         for result_series in matched_results:
             for result in result_series:
@@ -490,6 +492,7 @@ class SimpleExploreAgentGroup:
                 history_list.append(result.get('history', None))
                 all_trajectory_ids.append(result.get('trajectory_id', None))
                 all_instance_ids.append(result.get('instance_id', None))
+                all_is_last_turns.append(result.get('is_last_turn', False))
 
 
         # Encode messages, get assistant mask and position ids
@@ -544,6 +547,7 @@ class SimpleExploreAgentGroup:
             'trajectory_ids': all_trajectory_ids,
             'instance_ids': all_instance_ids,
             'user_content': user_content,
+            'is_last_turn': all_is_last_turns,
         }
         
         # Create and return DataProto
