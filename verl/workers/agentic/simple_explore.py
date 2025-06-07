@@ -524,10 +524,7 @@ class SimpleExploreAgentGroup:
         attention_mask = torch.cat([prompt_attention_mask, response_attention_mask], dim=1)
         position_ids = compute_position_id_with_mask(attention_mask)
 
-        print("&&&&")
-        print(all_prompts[0])
-        print("&&&&")
-        user_content = [prompt['content'] for prompt in all_prompts]
+        user_content = [prompt[0]['content'] for prompt in all_prompts]
 
         # Create tensor dictionary
         logger.info(f"input_ids shape: {input_ids.shape}, response_ids shape: {response_ids.shape}, max_starting_message_length: {self.max_starting_message_length}, max_response_length: {self.total_len}")
