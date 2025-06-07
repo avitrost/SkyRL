@@ -539,7 +539,7 @@ class RayPPOTrainer(object):
                 return {}
 
             # Store original inputs
-            input_ids = test_batch.batch['raw_prompt_ids'] # changed from 'input_ids' to 'raw_prompt_ids'
+            input_ids = test_batch.batch['input_ids']
             # TODO: Can we keep special tokens except for padding tokens?
             input_texts = [self.tokenizer.decode(ids, skip_special_tokens=True) for ids in input_ids]
             sample_inputs.extend(input_texts)
@@ -612,7 +612,7 @@ class RayPPOTrainer(object):
 
         data_sources = np.concatenate(data_source_lst, axis=0)
 
-        data_src2var2metric2val = process_validation_metrics(data_sources, sample_inputs, reward_extra_infos_dict)
+        data_src2var2metric2val = process_validation_metrics(data_sources, processed_sample_inputs, reward_extra_infos_dict)
         
         metric_dict = {}
         for data_source, var2metric2val in data_src2var2metric2val.items():
